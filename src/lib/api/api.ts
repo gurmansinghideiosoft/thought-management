@@ -4,6 +4,9 @@ import type {
   ActivityResponse,
   AuthResponse,
   Entry,
+  JournalContent,
+  JournalEntry,
+  JournalListResponse,
   Tag,
   TagWithCount,
   Task,
@@ -53,6 +56,7 @@ export const api = createApi({
     'Task',
     'TaskCalendar',
     'TaskTag',
+    'Journal',
   ],
   endpoints: (build) => ({
     // --- auth ------------------------------------------------------------
@@ -419,6 +423,55 @@ export const api = createApi({
       query: (id) => ({ url: `/task-tags/${id}`, method: 'DELETE' }),
       invalidatesTags: ['TaskTag', 'Task', 'TaskCalendar'],
     }),
+
+    // --- journal ------------------------------------------------------
+    listJournal: build.infiniteQuery<JournalListResponse, void, string | null>({
+      infiniteQueryOptions: {
+        initialPageParam: null,
+        getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+      },
+      query: ({ pageParam }) => ({
+        url: '/journal',
+        params: clean({ cursor: pageParam ?? undefined, limit: 12 }),
+      }),
+      providesTags: ['Journal'],
+    }),
+    getJournalEntry: build.query<JournalEntry, string>({
+      query: (id) => ({ url: `/journal/${id}` }),
+      providesTags: (_r, _e, id) => [{ type: 'Journal', id }],
+    }),
+    upsertJournalByDate: build.mutation<
+      JournalEntry,
+      { date: string; title?: string; content?: JournalContent }
+    >({
+      query: ({ date, ...body }) => ({
+        url: `/journal/by-date/${date}`,
+        method: 'PUT',
+        data: body,
+      }),
+      invalidatesTags: ['Journal'],
+    }),
+    updateJournalEntry: build.mutation<
+      JournalEntry,
+      {
+        id: string;
+        title?: string;
+        content?: JournalContent;
+        excerpt?: string;
+        wordCount?: number;
+      }
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/journal/${id}`,
+        method: 'PATCH',
+        data: body,
+      }),
+      invalidatesTags: (_r, _e, { id }) => [{ type: 'Journal', id }, 'Journal'],
+    }),
+    deleteJournalEntry: build.mutation<void, string>({
+      query: (id) => ({ url: `/journal/${id}`, method: 'DELETE' }),
+      invalidatesTags: ['Journal'],
+    }),
   }),
 });
 
@@ -460,4 +513,9 @@ export const {
   useCreateTaskTagMutation,
   useUpdateTaskTagMutation,
   useDeleteTaskTagMutation,
+  useListJournalInfiniteQuery,
+  useGetJournalEntryQuery,
+  useUpsertJournalByDateMutation,
+  useUpdateJournalEntryMutation,
+  useDeleteJournalEntryMutation,
 } = api;

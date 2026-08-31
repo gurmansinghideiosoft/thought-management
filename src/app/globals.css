@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@plugin '@tailwindcss/typography';
 
 @theme {
   --color-canvas: #faf9f7;
@@ -49,4 +50,31 @@ body {
   margin-inline: auto;
   width: 100%;
   max-width: 44rem;
+}
+
+/* --- Journal editor (Tiptap + @tailwindcss/typography) --- */
+.prose {
+  --tw-prose-body: var(--color-ink);
+  --tw-prose-headings: var(--color-ink);
+  --tw-prose-links: var(--color-accent);
+  --tw-prose-bold: var(--color-ink);
+  --tw-prose-quotes: var(--color-ink-muted);
+  --tw-prose-quote-borders: var(--color-border-strong);
+  --tw-prose-hr: var(--color-border);
+  --tw-prose-bullets: var(--color-ink-faint);
+  --tw-prose-counters: var(--color-ink-faint);
+  --tw-prose-code: var(--color-ink);
+}
+
+/* Placeholder text for the empty editor. */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: var(--color-ink-faint);
+}
+
+.tiptap:focus {
+  outline: none;
 }

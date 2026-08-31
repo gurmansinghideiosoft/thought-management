@@ -140,3 +140,29 @@ export interface TaskCalendarResponse {
   month: string;
   counts: Record<string, { pending: number; done: number }>;
 }
+
+// --- journal -----------------------------------------------------------
+
+/** A Tiptap / ProseMirror document. */
+export type JournalContent = { type: string; content?: unknown[] } & Record<
+  string,
+  unknown
+>;
+
+export interface JournalEntry {
+  id: string;
+  /** `YYYY-MM-DD` */
+  date: string;
+  title: string;
+  content: JournalContent;
+  excerpt: string;
+  wordCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface JournalListResponse {
+  items: JournalEntry[];
+  hasMore: boolean;
+  nextCursor: string | null;
+}
