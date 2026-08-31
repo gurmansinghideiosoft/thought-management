@@ -89,7 +89,7 @@ export function EntryItem({
   };
 
   return (
-    <div className="group border-border bg-surface relative rounded-xl border px-4 py-3">
+    <div className="group border-hairline bg-surface relative rounded-xl border px-4 py-3">
       <div className="text-ink-faint mb-1 flex items-center gap-2 text-[12px]">
         <span>{clockTime(entry.createdAt)}</span>
         {entry.kind !== 'note' ? (
@@ -168,7 +168,7 @@ export function EntryItem({
               href={entry.link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="border-border bg-surface-2/60 hover:bg-surface-2 mt-2 flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm transition-colors"
+              className="border-hairline bg-surface-2/60 hover:bg-surface-2 mt-2 flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm transition-colors"
             >
               <Link2 size={15} className="text-ink-faint shrink-0" />
               <span className="min-w-0 flex-1 truncate">
@@ -183,7 +183,7 @@ export function EntryItem({
           ) : null}
 
           {entry.kind === 'file' && entry.file ? (
-            <div className="border-border bg-surface-2/60 mt-2 flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm">
+            <div className="border-hairline bg-surface-2/60 mt-2 flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm">
               {entry.file.category === 'image' ? (
                 <ImageIcon size={15} className="text-ink-faint shrink-0" />
               ) : (
@@ -217,7 +217,7 @@ export function EntryItem({
         {available.length > 0 ? (
           <Popover.Root>
             <Popover.Trigger asChild>
-              <button className="border-border-strong text-ink-faint hover:text-ink inline-flex items-center gap-1 rounded-full border border-dashed px-2 py-1 text-[12px] leading-none transition-colors">
+              <button className="border-hairline text-ink-faint hover:text-ink inline-flex items-center gap-1 rounded-full border border-dashed px-2 py-1 text-[12px] leading-none transition-colors">
                 <Plus size={11} /> tag
               </button>
             </Popover.Trigger>
@@ -225,7 +225,7 @@ export function EntryItem({
               <Popover.Content
                 sideOffset={6}
                 align="start"
-                className="border-border bg-surface z-50 w-48 rounded-xl border p-1 shadow-lg shadow-black/[0.08]"
+                className="border-hairline bg-surface z-50 w-48 rounded-xl border p-1 shadow-lg shadow-black/[0.08]"
               >
                 {available.map((t) => (
                   <button

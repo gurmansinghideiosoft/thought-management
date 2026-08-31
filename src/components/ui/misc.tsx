@@ -1,17 +1,17 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
+import { Spinner as HeroSpinner } from '@heroui/react';
 
 import { cn } from '@/lib/cn';
 
 export function Spinner({ className }: { className?: string }) {
-  return <Loader2 className={cn('text-ink-faint animate-spin', className)} size={18} />;
+  return <HeroSpinner className={cn('text-ink-faint', className)} size="sm" />;
 }
 
 export function CenteredSpinner({ label }: { label?: string }) {
   return (
-    <div className="text-ink-faint flex flex-1 flex-col items-center justify-center gap-3 py-20">
-      <Spinner className="size-6" />
+    <div className="text-ink-faint flex flex-1 flex-col items-center justify-center gap-3 py-24">
+      <HeroSpinner size="lg" className="text-accent" />
       {label ? <p className="text-sm">{label}</p> : null}
     </div>
   );
@@ -24,7 +24,10 @@ export function Card({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('border-border bg-surface rounded-xl border', className)}
+      className={cn(
+        'border-hairline bg-surface rounded-xl border shadow-[0_1px_2px_rgba(26,23,18,0.04)]',
+        className,
+      )}
       {...props}
     >
       {children}
@@ -44,9 +47,13 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="border-border-strong flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-6 py-16 text-center">
-      {icon ? <div className="text-ink-faint mb-1">{icon}</div> : null}
-      <p className="text-ink font-medium">{title}</p>
+    <div className="border-hairline flex flex-col items-center justify-center gap-2.5 rounded-2xl border border-dashed px-6 py-20 text-center">
+      {icon ? (
+        <div className="bg-surface-2 text-ink-faint mb-1 grid size-12 place-items-center rounded-full">
+          {icon}
+        </div>
+      ) : null}
+      <p className="text-ink font-serif text-lg font-semibold">{title}</p>
       {description ? (
         <p className="text-ink-muted max-w-sm text-sm">{description}</p>
       ) : null}

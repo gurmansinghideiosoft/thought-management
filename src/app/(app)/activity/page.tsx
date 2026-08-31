@@ -35,7 +35,7 @@ export default function ActivityPage() {
   return (
     <>
       <PageHeader title="Activity" subtitle="Everything you’ve added, newest first" />
-      <div className="reading-column flex-1 px-4 py-5">
+      <div className="content-column flex-1 px-4 py-5 sm:px-6">
         <div className="mb-4 flex gap-1.5">
           {KINDS.map((k) => (
             <button
@@ -44,8 +44,8 @@ export default function ActivityPage() {
               className={cn(
                 'rounded-full border px-2.5 py-1 text-[12px] leading-none transition-colors',
                 kind === k.value
-                  ? 'border-accent/40 bg-accent-tint text-accent'
-                  : 'border-border-strong bg-surface text-ink-muted hover:text-ink',
+                  ? 'border-accent/40 bg-accent/12 text-accent'
+                  : 'border-hairline bg-surface text-ink-muted hover:text-ink',
               )}
             >
               {k.label}
@@ -65,7 +65,7 @@ export default function ActivityPage() {
                 <Link
                   key={item.id}
                   href={`/thoughts/${item.thought.id}`}
-                  className="border-border bg-surface hover:bg-surface-2/50 flex gap-3 rounded-xl border px-4 py-3 transition-colors"
+                  className="border-hairline bg-surface hover:bg-surface-2/50 flex gap-3 rounded-xl border px-4 py-3 transition-colors"
                 >
                   <Icon size={15} className="text-ink-faint mt-0.5 shrink-0" />
                   <div className="min-w-0 flex-1">

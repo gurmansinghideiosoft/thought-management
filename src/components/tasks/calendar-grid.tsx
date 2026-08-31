@@ -33,8 +33,8 @@ export function CalendarGrid({
   const counts = data?.counts ?? {};
 
   return (
-    <div className="flex flex-1 flex-col">
-      <div className="border-border text-ink-faint grid grid-cols-7 border-b px-2 pt-1 pb-1.5 text-[11px] font-medium tracking-wide uppercase">
+    <div className="flex flex-1 flex-col overflow-hidden px-3 pb-3 sm:px-4">
+      <div className="text-ink-faint grid grid-cols-7 pt-1 pb-2 text-[11px] font-medium tracking-wide uppercase">
         {WEEKDAYS.map((d) => (
           <div key={d} className="px-2">
             {d}
@@ -42,24 +42,31 @@ export function CalendarGrid({
         ))}
       </div>
 
-      <div className="grid flex-1 grid-cols-7 grid-rows-6">
-        {days.map((day) => {
+      <div className="border-hairline bg-surface grid flex-1 grid-cols-7 grid-rows-6 overflow-hidden rounded-xl border">
+        {days.map((day, i) => {
           const c = counts[day.key] ?? { pending: 0, done: 0 };
+          const lastCol = (i + 1) % 7 === 0;
+          const lastRow = i >= 35;
           return (
             <button
               key={day.key}
               onClick={() => onPickDay(day.key)}
               className={cn(
-                'group border-border hover:bg-surface-2/50 relative flex flex-col border-r border-b p-1.5 text-left transition-colors',
-                !day.inMonth && 'bg-surface-2/30 text-ink-faint',
+                'group hover:bg-surface-2/60 relative flex min-h-0 flex-col p-1.5 text-left transition-colors',
+                !lastCol && 'border-hairline border-r',
+                !lastRow && 'border-hairline border-b',
+                !day.inMonth && 'bg-surface-2/40 text-ink-faint',
               )}
             >
               <div className="flex items-center justify-between">
                 <span
                   className={cn(
-                    'flex size-6 items-center justify-center rounded-full text-[13px]',
-                    day.isToday && 'bg-accent font-semibold text-white',
-                    !day.isToday && day.inMonth && 'text-ink',
+                    'flex size-6 items-center justify-center rounded-full text-[12.5px] tabular-nums',
+                    day.isToday
+                      ? 'bg-accent text-accent-fg font-semibold'
+                      : day.inMonth
+                        ? 'text-ink'
+                        : 'text-ink-faint',
                   )}
                 >
                   {day.date.getDate()}
@@ -80,7 +87,7 @@ export function CalendarGrid({
 
               <div className="mt-auto flex flex-wrap gap-1">
                 {c.pending > 0 ? (
-                  <span className="bg-accent-tint text-accent inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] leading-none font-medium">
+                  <span className="bg-accent/12 text-accent inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] leading-none font-medium">
                     <span className="bg-accent size-1.5 rounded-full" />
                     {c.pending}
                   </span>

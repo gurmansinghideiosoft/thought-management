@@ -25,14 +25,14 @@ export function TimelineFilters({
   const active = value.tagId || value.starred || value.kind;
 
   return (
-    <div className="border-border bg-canvas/70 flex flex-wrap items-center gap-1.5 border-b px-4 py-2.5">
+    <div className="border-hairline bg-paper/70 flex flex-wrap items-center gap-1.5 border-b px-4 py-2.5">
       <button
         onClick={() => set({ starred: value.starred ? undefined : true })}
         className={cn(
           'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] leading-none transition-colors',
           value.starred
             ? 'border-star/40 bg-star/10 text-star'
-            : 'border-border-strong bg-surface text-ink-muted hover:text-ink',
+            : 'border-hairline bg-surface text-ink-muted hover:text-ink',
         )}
       >
         <Star size={12} className={cn(value.starred && 'fill-star')} />

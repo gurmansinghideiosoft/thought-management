@@ -1,5 +1,6 @@
 'use client';
 
+import { ThemeProvider } from 'next-themes';
 import { useState } from 'react';
 import { Provider } from 'react-redux';
 
@@ -12,7 +13,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <Provider store={store}>
-      <ToastProvider>{children}</ToastProvider>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+        <ToastProvider>{children}</ToastProvider>
+      </ThemeProvider>
     </Provider>
   );
 }

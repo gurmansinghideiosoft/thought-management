@@ -38,7 +38,7 @@ export function TaskFilterBar({
   const dirty = value.tagIds.length > 0 || value.priorities.length > 0;
 
   return (
-    <div className="border-border bg-canvas/70 flex flex-wrap items-center gap-1.5 border-b px-4 py-2.5">
+    <div className="border-hairline bg-paper/70 flex flex-wrap items-center gap-1.5 border-b px-4 py-2.5">
       {PRIORITIES.map((p) => {
         const active = value.priorities.includes(p);
         return (
@@ -49,7 +49,7 @@ export function TaskFilterBar({
               'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] leading-none transition-colors',
               active
                 ? 'border-ink/20 bg-surface-2 text-ink'
-                : 'border-border-strong bg-surface text-ink-muted hover:text-ink',
+                : 'border-hairline bg-surface text-ink-muted hover:text-ink',
             )}
           >
             <span
@@ -61,7 +61,7 @@ export function TaskFilterBar({
         );
       })}
 
-      {(tags ?? []).length > 0 ? <span className="bg-border mx-1 h-4 w-px" /> : null}
+      {(tags ?? []).length > 0 ? <span className="bg-hairline mx-1 h-4 w-px" /> : null}
 
       {(tags ?? []).map((t) => (
         <TagPill

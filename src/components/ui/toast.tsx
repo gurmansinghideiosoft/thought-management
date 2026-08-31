@@ -26,11 +26,7 @@ export function useToast(): ToastApi {
   return ctx;
 }
 
-const ICONS = {
-  success: CheckCircle2,
-  error: XCircle,
-  info: Info,
-} as const;
+const ICONS = { success: CheckCircle2, error: XCircle, info: Info } as const;
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
@@ -61,15 +57,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={api}>
       {children}
-      <div className="pointer-events-none fixed right-4 bottom-4 z-50 flex w-80 flex-col gap-2">
+      <div className="pointer-events-none fixed right-4 bottom-4 z-[60] flex w-80 flex-col gap-2">
         {items.map((t) => {
           const Icon = ICONS[t.kind];
           return (
             <div
               key={t.id}
               className={cn(
-                'bg-surface pointer-events-auto flex items-start gap-2.5 rounded-xl border px-3.5 py-3 text-sm shadow-lg shadow-black/[0.06]',
-                t.kind === 'error' ? 'border-danger/30' : 'border-border',
+                'border-hairline bg-overlay pointer-events-auto flex items-start gap-2.5 rounded-xl border px-3.5 py-3 text-sm shadow-xl shadow-black/15',
+                t.kind === 'error' && 'border-danger/35',
               )}
             >
               <Icon

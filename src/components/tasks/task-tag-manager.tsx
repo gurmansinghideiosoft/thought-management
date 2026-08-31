@@ -93,7 +93,7 @@ export function TaskTagManager({ trigger }: { trigger: React.ReactNode }) {
               ) : null}
             </div>
 
-            <div className="border-border flex items-center gap-2 border-t pt-3">
+            <div className="border-hairline flex items-center gap-2 border-t pt-3">
               <ColorPicker value={color} onChange={setColor} />
               <Input
                 value={name}
@@ -131,7 +131,7 @@ function TagRow({
   const dirty = draft.trim() !== name && draft.trim().length > 0;
 
   return (
-    <div className="border-border bg-surface flex items-center gap-2 rounded-lg border px-2 py-1.5">
+    <div className="border-hairline bg-surface flex items-center gap-2 rounded-lg border px-2 py-1.5">
       <ColorPicker value={color} onChange={onRecolor} />
       <input
         value={draft}

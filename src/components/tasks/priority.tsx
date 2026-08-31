@@ -42,7 +42,7 @@ export function PrioritySelect({
 
   return (
     <RadixSelect.Root open={open} onOpenChange={setOpen}>
-      <RadixSelect.Trigger className="border-border-strong bg-surface text-ink-muted inline-flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-sm focus:outline-none">
+      <RadixSelect.Trigger className="border-hairline bg-surface text-ink-muted inline-flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-sm focus:outline-none">
         <PriorityDot priority={p} />
         <span className="hidden sm:inline">{PRIORITY_LABELS[p]}</span>
         <ChevronDown size={13} className="text-ink-faint" />
@@ -51,7 +51,7 @@ export function PrioritySelect({
         <RadixSelect.Content
           align="start"
           sideOffset={6}
-          className="border-border bg-surface z-50 w-52 rounded-xl border p-1 shadow-lg shadow-black/[0.08]"
+          className="border-hairline bg-surface z-50 w-52 rounded-xl border p-1 shadow-lg shadow-black/[0.08]"
         >
           {PRIORITIES.map((option) => (
             <button

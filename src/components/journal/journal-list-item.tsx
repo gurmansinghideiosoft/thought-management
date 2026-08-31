@@ -13,7 +13,7 @@ export function JournalListItem({ entry }: { entry: JournalEntry }) {
   return (
     <Link
       href={`/journal/${entry.id}`}
-      className="group hover:border-border hover:bg-surface flex items-center gap-4 rounded-lg border border-transparent px-3 py-3 transition-colors"
+      className="group hover:border-hairline hover:bg-surface flex items-center gap-4 rounded-lg border border-transparent px-3 py-3 transition-colors"
     >
       <div className="w-16 shrink-0 text-right">
         <div className="text-ink text-sm font-medium">{format(d, 'MMM d')}</div>

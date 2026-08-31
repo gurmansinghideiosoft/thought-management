@@ -55,7 +55,7 @@ export function AddTaskForm({
           onChange={(e) => setContent(e.target.value)}
           placeholder="Add a task…"
           maxLength={500}
-          className="border-border-strong bg-surface text-ink placeholder:text-ink-faint focus:border-accent/50 focus:ring-accent/20 h-9 flex-1 rounded-lg border px-3 text-sm focus:ring-2 focus:outline-none"
+          className="border-hairline bg-surface text-ink placeholder:text-ink-faint focus:border-accent/50 focus:ring-accent/20 h-9 flex-1 rounded-lg border px-3 text-sm focus:ring-2 focus:outline-none"
         />
         <PrioritySelect value={priority} onChange={setPriority} />
         <Button type="submit" size="sm" className="h-9" loading={isLoading}>
@@ -77,8 +77,8 @@ export function AddTaskForm({
                 className={cn(
                   'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] leading-none transition-colors',
                   on
-                    ? 'border-accent/40 bg-accent-tint text-accent'
-                    : 'border-border-strong bg-surface text-ink-faint hover:text-ink',
+                    ? 'border-accent/40 bg-accent/12 text-accent'
+                    : 'border-hairline bg-surface text-ink-faint hover:text-ink',
                 )}
               >
                 <span

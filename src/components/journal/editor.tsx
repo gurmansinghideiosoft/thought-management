@@ -26,7 +26,7 @@ function MenuButton({
       className={cn(
         'flex size-7 items-center justify-center rounded-md transition-colors',
         active
-          ? 'bg-accent text-white'
+          ? 'bg-accent text-accent-fg'
           : 'text-ink-muted hover:bg-surface-2 hover:text-ink',
       )}
     >
@@ -83,7 +83,7 @@ export function JournalEditor({
     <>
       <BubbleMenu
         editor={editor}
-        className="border-border bg-surface flex items-center gap-0.5 rounded-lg border p-1 shadow-lg shadow-black/10"
+        className="border-hairline bg-surface flex items-center gap-0.5 rounded-lg border p-1 shadow-lg shadow-black/10"
       >
         <MenuButton
           active={editor.isActive('bold')}

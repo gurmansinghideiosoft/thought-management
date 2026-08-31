@@ -23,7 +23,7 @@ export default function TrashPage() {
         title="Trash"
         subtitle="Deleted thoughts. Restoring brings back their entries too."
       />
-      <div className="reading-column flex-1 px-4 py-5">
+      <div className="content-column flex-1 px-4 py-5 sm:px-6">
         {isLoading ? (
           <CenteredSpinner />
         ) : items.length === 0 ? (
@@ -37,7 +37,7 @@ export default function TrashPage() {
             {items.map((t) => (
               <div
                 key={t.id}
-                className="border-border bg-surface flex items-center gap-3 rounded-xl border px-4 py-3"
+                className="border-hairline bg-surface flex items-center gap-3 rounded-xl border px-4 py-3"
               >
                 <div className="min-w-0 flex-1">
                   <p className="text-ink truncate font-medium">{t.title}</p>

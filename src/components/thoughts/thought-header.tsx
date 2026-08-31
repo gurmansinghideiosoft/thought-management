@@ -105,7 +105,7 @@ export function ThoughtHeader({ thought }: { thought: Thought }) {
         }
       />
 
-      <div className="border-border bg-canvas/60 border-b">
+      <div className="border-hairline bg-paper/60 border-b">
         <div className="reading-column px-4 py-3">
           {thought.description ? (
             <p className="text-ink-muted text-[13.5px] leading-relaxed whitespace-pre-wrap">

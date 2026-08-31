@@ -46,7 +46,7 @@ export default function TasksPage() {
               Show completed
             </label>
 
-            <div className="border-border-strong bg-surface flex rounded-lg border p-0.5">
+            <div className="border-hairline bg-surface flex rounded-lg border p-0.5">
               {(
                 [
                   ['calendar', CalendarDays],
@@ -81,7 +81,7 @@ export default function TasksPage() {
         }
       />
 
-      <div className="border-border bg-canvas/70 flex items-center gap-1 border-b px-4 py-2">
+      <div className="border-hairline bg-paper/70 flex items-center gap-1 border-b px-4 py-2">
         <IconButton
           label="Previous month"
           onClick={() => setMonth(shiftMonth(month, -1))}

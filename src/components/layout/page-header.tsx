@@ -15,19 +15,21 @@ export function PageHeader({
   actions?: React.ReactNode;
 }) {
   return (
-    <header className="border-border bg-canvas/80 sticky top-0 z-10 border-b backdrop-blur">
-      <div className="reading-column flex items-center gap-3 px-4 py-3.5">
+    <header className="border-hairline bg-paper/80 sticky top-0 z-20 border-b backdrop-blur-md">
+      <div className="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-4 sm:px-6">
         {backHref ? (
           <Link
             href={backHref}
-            className="text-ink-faint hover:bg-surface-2 hover:text-ink -ml-1 shrink-0 rounded-lg p-1 transition-colors"
+            className="text-ink-faint hover:bg-surface-2 hover:text-ink -ml-1 shrink-0 rounded-lg p-1.5 transition-colors"
             aria-label="Back"
           >
             <ArrowLeft size={18} />
           </Link>
         ) : null}
         <div className="min-w-0 flex-1">
-          <h1 className="text-ink truncate text-[15px] font-semibold">{title}</h1>
+          <h1 className="text-ink truncate font-serif text-xl font-semibold tracking-tight">
+            {title}
+          </h1>
           {subtitle ? (
             <p className="text-ink-muted truncate text-[13px]">{subtitle}</p>
           ) : null}

@@ -56,7 +56,7 @@ export function ListView({
         const done = dayTasks.filter((t) => t.status === 'done');
         return (
           <section key={date} className="mb-5">
-            <h2 className="bg-canvas/85 text-ink sticky top-0 z-[1] -mx-2 px-2 py-1.5 text-[13px] font-semibold backdrop-blur">
+            <h2 className="bg-paper/85 text-ink sticky top-0 z-[1] -mx-2 px-2 py-1.5 text-[13px] font-semibold backdrop-blur">
               {prettyDayShort(date)}
               <span className="text-ink-faint ml-2 font-normal">{pending.length}</span>
             </h2>

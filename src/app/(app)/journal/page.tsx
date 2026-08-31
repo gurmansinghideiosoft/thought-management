@@ -53,7 +53,7 @@ export default function JournalPage() {
         }
       />
 
-      <div className="reading-column flex-1 px-4 py-6">
+      <div className="content-column flex-1 px-4 py-6 sm:px-6">
         {isLoading ? (
           <CenteredSpinner />
         ) : entries.length === 0 ? (

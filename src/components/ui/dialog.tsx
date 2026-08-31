@@ -22,17 +22,20 @@ export function DialogContent({
 }) {
   return (
     <RadixDialog.Portal>
-      <RadixDialog.Overlay className="bg-ink/20 fixed inset-0 z-40 backdrop-blur-[1px]" />
+      <RadixDialog.Overlay
+        className="fixed inset-0 z-40"
+        style={{ backgroundColor: 'var(--backdrop)' }}
+      />
       <RadixDialog.Content
         className={cn(
           'fixed top-1/2 left-1/2 z-50 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2',
-          'border-border bg-surface rounded-2xl border p-5 shadow-xl shadow-black/10 focus:outline-none',
+          'border-hairline bg-overlay rounded-2xl border p-5 shadow-2xl shadow-black/20 focus:outline-none',
           className,
         )}
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
-            <RadixDialog.Title className="text-ink text-[15px] font-semibold">
+            <RadixDialog.Title className="text-ink font-serif text-[17px] font-semibold">
               {title}
             </RadixDialog.Title>
             {description ? (

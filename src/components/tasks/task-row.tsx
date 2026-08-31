@@ -73,8 +73,8 @@ export function TaskRow({ task, tags }: { task: Task; tags: TaskTag[] }) {
         className={cn(
           'mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-[5px] border transition-colors',
           done
-            ? 'border-accent bg-accent text-white'
-            : 'border-border-strong hover:border-accent',
+            ? 'border-accent bg-accent text-accent-fg'
+            : 'border-hairline hover:border-accent',
         )}
         aria-label={done ? 'Mark pending' : 'Mark done'}
       >
@@ -135,7 +135,7 @@ export function TaskRow({ task, tags }: { task: Task; tags: TaskTag[] }) {
               <Popover.Content
                 align="end"
                 sideOffset={6}
-                className="border-border bg-surface z-50 w-44 rounded-xl border p-1 shadow-lg shadow-black/[0.08]"
+                className="border-hairline bg-surface z-50 w-44 rounded-xl border p-1 shadow-lg shadow-black/[0.08]"
               >
                 {available.map((t) => (
                   <button

@@ -8,19 +8,28 @@ import { CreateThoughtDialog } from '@/components/thoughts/create-thought-dialog
 import { ThoughtCard } from '@/components/thoughts/thought-card';
 import { Input } from '@/components/ui/input';
 import { CenteredSpinner, EmptyState } from '@/components/ui/misc';
+import { Select } from '@/components/ui/select';
 import { type ListThoughtsArgs, useListThoughtsQuery } from '@/lib/api/api';
 import { useDebounced } from '@/lib/use-debounced';
 
-const SORTS: { value: NonNullable<ListThoughtsArgs['sort']>; label: string }[] = [
+type Sort = NonNullable<ListThoughtsArgs['sort']>;
+
+const SORTS: readonly { value: Sort; label: string }[] = [
   { value: 'recent', label: 'Recent activity' },
   { value: 'created', label: 'Newest' },
   { value: 'oldest', label: 'Oldest' },
-  { value: 'title', label: 'Title' },
+  { value: 'title', label: 'Title A–Z' },
 ];
+
+const STATUSES = [
+  { value: '', label: 'All' },
+  { value: 'active', label: 'Active' },
+  { value: 'archived', label: 'Archived' },
+] as const;
 
 export default function ThoughtsPage() {
   const [q, setQ] = useState('');
-  const [sort, setSort] = useState<NonNullable<ListThoughtsArgs['sort']>>('recent');
+  const [sort, setSort] = useState<Sort>('recent');
   const [status, setStatus] = useState<'active' | 'archived' | ''>('');
   const debouncedQ = useDebounced(q, 300);
 
@@ -41,9 +50,9 @@ export default function ThoughtsPage() {
         actions={<CreateThoughtDialog />}
       />
 
-      <div className="reading-column w-full flex-1 px-4 py-5">
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-          <div className="relative min-w-[200px] flex-1">
+      <div className="content-column flex-1 px-4 py-6 sm:px-6">
+        <div className="mb-5 flex flex-wrap items-center gap-2">
+          <div className="relative min-w-[220px] flex-1">
             <Search
               size={15}
               className="text-ink-faint pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
@@ -55,26 +64,13 @@ export default function ThoughtsPage() {
               className="pl-9"
             />
           </div>
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as typeof sort)}
-            className="border-border-strong bg-surface text-ink-muted h-10 rounded-lg border px-2.5 text-sm focus:outline-none"
-          >
-            {SORTS.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </select>
-          <select
+          <Select ariaLabel="Sort" value={sort} onValueChange={setSort} options={SORTS} />
+          <Select
+            ariaLabel="Status"
             value={status}
-            onChange={(e) => setStatus(e.target.value as typeof status)}
-            className="border-border-strong bg-surface text-ink-muted h-10 rounded-lg border px-2.5 text-sm focus:outline-none"
-          >
-            <option value="">All</option>
-            <option value="active">Active</option>
-            <option value="archived">Archived</option>
-          </select>
+            onValueChange={setStatus}
+            options={STATUSES}
+          />
         </div>
 
         {isLoading ? (
@@ -92,7 +88,7 @@ export default function ThoughtsPage() {
           />
         ) : (
           <div
-            className="flex flex-col gap-2.5 transition-opacity"
+            className="grid gap-3 transition-opacity sm:grid-cols-2 xl:grid-cols-3"
             style={{ opacity: isFetching ? 0.6 : 1 }}
           >
             {items.map((t) => (

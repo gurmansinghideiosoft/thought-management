@@ -19,7 +19,7 @@ export function DropdownContent({
       <RadixMenu.Content
         align={align}
         sideOffset={6}
-        className="border-border bg-surface z-50 min-w-44 rounded-xl border p-1 shadow-lg shadow-black/[0.08] focus:outline-none"
+        className="border-hairline bg-overlay z-50 min-w-48 rounded-xl border p-1 shadow-xl shadow-black/15 focus:outline-none"
       >
         {children}
       </RadixMenu.Content>
@@ -54,5 +54,5 @@ export function DropdownItem({
 }
 
 export const DropdownSeparator = () => (
-  <RadixMenu.Separator className="bg-border my-1 h-px" />
+  <RadixMenu.Separator className="bg-hairline my-1 h-px" />
 );

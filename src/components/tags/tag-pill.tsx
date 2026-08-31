@@ -26,11 +26,20 @@ export function TagPill({
   return (
     <Comp
       onClick={onClick}
+      style={
+        active && color
+          ? {
+              color,
+              borderColor: `color-mix(in oklab, ${color} 45%, transparent)`,
+              backgroundColor: `color-mix(in oklab, ${color} 12%, transparent)`,
+            }
+          : undefined
+      }
       className={cn(
         'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] leading-none transition-colors',
         active
-          ? 'border-accent/40 bg-accent-tint text-accent'
-          : 'border-border-strong bg-surface text-ink-muted',
+          ? 'border-accent/40 bg-accent/12 text-accent'
+          : 'border-hairline bg-surface text-ink-muted',
         onClick && !active && 'hover:bg-surface-2 hover:text-ink',
         className,
       )}

@@ -22,9 +22,11 @@ export default function AuthLayout({ children }: LayoutProps<'/'>) {
     <main className="flex flex-1 items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-ink text-lg font-semibold tracking-tight">Thoughts</h1>
-          <p className="text-ink-muted mt-1 text-sm">
-            Capture an idea, then grow it over time.
+          <h1 className="text-ink font-serif text-2xl font-semibold tracking-tight">
+            Thoughts
+          </h1>
+          <p className="text-ink-muted mt-1.5 text-sm">
+            A quiet place for ideas, tasks, and the day just gone.
           </p>
         </div>
         {children}

@@ -59,10 +59,10 @@ export function EntryComposer({ thoughtId }: { thoughtId: string }) {
     file != null || (linkMode ? url.trim().length > 0 : text.trim().length > 0);
 
   return (
-    <div className="border-border bg-canvas/90 border-t backdrop-blur">
+    <div className="border-hairline bg-paper/90 border-t backdrop-blur">
       <div className="reading-column px-4 py-3">
         {file ? (
-          <div className="border-border bg-surface mb-2 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+          <div className="border-hairline bg-surface mb-2 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
             <Paperclip size={14} className="text-ink-faint" />
             <span className="flex-1 truncate">{file.name}</span>
             <span className="text-ink-faint text-[12px]">{fileSize(file.size)}</span>
@@ -135,7 +135,7 @@ export function EntryComposer({ thoughtId }: { thoughtId: string }) {
                   ? 'Add a note about this link…'
                   : 'Add to this thought…'
             }
-            className="border-border-strong bg-surface text-ink placeholder:text-ink-faint focus:border-accent/50 focus:ring-accent/20 max-h-40 min-h-[40px] flex-1 resize-none rounded-lg border px-3 py-2 text-sm leading-relaxed focus:ring-2 focus:outline-none"
+            className="border-hairline bg-surface text-ink placeholder:text-ink-faint focus:border-accent/50 focus:ring-accent/20 max-h-40 min-h-[40px] flex-1 resize-none rounded-lg border px-3 py-2 text-sm leading-relaxed focus:ring-2 focus:outline-none"
           />
 
           <Button

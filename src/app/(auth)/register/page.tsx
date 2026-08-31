@@ -45,7 +45,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="border-border bg-surface rounded-2xl border p-6">
+    <div className="border-hairline bg-surface rounded-2xl border p-6">
       <h2 className="text-ink mb-5 text-[15px] font-semibold">Create your account</h2>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <Field label="Name" hint="Optional" error={errors.name?.message}>

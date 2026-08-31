@@ -83,8 +83,8 @@ export default function JournalEditorPage({
   const day = fromDateKey(entry.date);
 
   return (
-    <div className="bg-canvas fixed inset-0 z-40 flex flex-col overflow-y-auto">
-      <header className="border-border bg-canvas/85 sticky top-0 z-10 border-b backdrop-blur">
+    <div className="bg-paper fixed inset-0 z-40 flex flex-col overflow-y-auto">
+      <header className="border-hairline bg-paper/85 sticky top-0 z-10 border-b backdrop-blur">
         <div className="mx-auto flex max-w-[680px] items-center gap-3 px-5 py-3">
           <IconButton label="Back to journal" onClick={() => router.push('/journal')}>
             <ArrowLeft size={18} />
