@@ -1,6 +1,6 @@
 'use client';
 
-import { Activity, Lightbulb, LogOut, Trash2 } from 'lucide-react';
+import { Activity, CalendarDays, Lightbulb, LogOut, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -15,6 +15,7 @@ import type { User } from '@/lib/types';
 
 const NAV = [
   { href: '/thoughts', label: 'Thoughts', icon: Lightbulb },
+  { href: '/tasks', label: 'Tasks', icon: CalendarDays },
   { href: '/activity', label: 'Activity', icon: Activity },
   { href: '/trash', label: 'Trash', icon: Trash2 },
 ];

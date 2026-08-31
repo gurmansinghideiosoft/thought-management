@@ -110,3 +110,33 @@ export interface ThoughtStats {
 export interface ApiErrorShape {
   error: { message: string; details?: unknown };
 }
+
+// --- tasks ---------------------------------------------------------------
+
+export interface TaskTag {
+  id: string;
+  name: string;
+  color: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type TaskStatus = 'pending' | 'done';
+
+export interface Task {
+  id: string;
+  content: string;
+  /** `YYYY-MM-DD` */
+  date: string;
+  status: TaskStatus;
+  completedAt: string | null;
+  priority: number;
+  tagIds: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TaskCalendarResponse {
+  month: string;
+  counts: Record<string, { pending: number; done: number }>;
+}

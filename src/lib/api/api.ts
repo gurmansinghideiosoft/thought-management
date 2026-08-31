@@ -6,6 +6,10 @@ import type {
   Entry,
   Tag,
   TagWithCount,
+  Task,
+  TaskCalendarResponse,
+  TaskStatus,
+  TaskTag,
   Thought,
   ThoughtListResponse,
   ThoughtStats,
@@ -46,6 +50,9 @@ export const api = createApi({
     'Tags',
     'Activity',
     'Stats',
+    'Task',
+    'TaskCalendar',
+    'TaskTag',
   ],
   endpoints: (build) => ({
     // --- auth ------------------------------------------------------------
@@ -318,6 +325,100 @@ export const api = createApi({
       }),
       providesTags: ['Activity'],
     }),
+
+    // --- tasks -----------------------------------------------------------
+    listTasks: build.query<
+      { items: Task[] },
+      {
+        from?: string;
+        to?: string;
+        status?: TaskStatus;
+        tags?: string[];
+        priorities?: number[];
+        q?: string;
+      }
+    >({
+      query: (args) => ({
+        url: '/tasks',
+        params: clean({
+          from: args.from,
+          to: args.to,
+          status: args.status,
+          q: args.q,
+          tags: args.tags?.length ? args.tags.join(',') : undefined,
+          priority: args.priorities?.length ? args.priorities.join(',') : undefined,
+        }),
+      }),
+      providesTags: ['Task'],
+    }),
+    taskCalendar: build.query<
+      TaskCalendarResponse,
+      { month: string; status?: TaskStatus; tags?: string[]; priorities?: number[] }
+    >({
+      query: (args) => ({
+        url: '/tasks/calendar',
+        params: clean({
+          month: args.month,
+          status: args.status,
+          tags: args.tags?.length ? args.tags.join(',') : undefined,
+          priority: args.priorities?.length ? args.priorities.join(',') : undefined,
+        }),
+      }),
+      providesTags: ['TaskCalendar'],
+    }),
+    createTask: build.mutation<
+      Task,
+      { content: string; date: string; priority?: number; tagIds?: string[] }
+    >({
+      query: (data) => ({ url: '/tasks', method: 'POST', data }),
+      invalidatesTags: ['Task', 'TaskCalendar'],
+    }),
+    updateTask: build.mutation<
+      Task,
+      {
+        id: string;
+        content?: string;
+        date?: string;
+        priority?: number;
+        tagIds?: string[];
+      }
+    >({
+      query: ({ id, ...data }) => ({ url: `/tasks/${id}`, method: 'PATCH', data }),
+      invalidatesTags: ['Task', 'TaskCalendar'],
+    }),
+    setTaskStatus: build.mutation<Task, { id: string; status: TaskStatus }>({
+      query: ({ id, status }) => ({
+        url: `/tasks/${id}/status`,
+        method: 'PUT',
+        data: { status },
+      }),
+      invalidatesTags: ['Task', 'TaskCalendar'],
+    }),
+    deleteTask: build.mutation<void, string>({
+      query: (id) => ({ url: `/tasks/${id}`, method: 'DELETE' }),
+      invalidatesTags: ['Task', 'TaskCalendar'],
+    }),
+
+    // --- task tags -----------------------------------------------------
+    listTaskTags: build.query<TaskTag[], void>({
+      query: () => ({ url: '/task-tags' }),
+      transformResponse: (r: { items: TaskTag[] }) => r.items,
+      providesTags: ['TaskTag'],
+    }),
+    createTaskTag: build.mutation<TaskTag, { name: string; color?: string }>({
+      query: (data) => ({ url: '/task-tags', method: 'POST', data }),
+      invalidatesTags: ['TaskTag'],
+    }),
+    updateTaskTag: build.mutation<TaskTag, { id: string; name?: string; color?: string }>(
+      {
+        query: ({ id, ...data }) => ({ url: `/task-tags/${id}`, method: 'PATCH', data }),
+        invalidatesTags: ['TaskTag', 'Task', 'TaskCalendar'],
+      },
+    ),
+    deleteTaskTag: build.mutation<void, string>({
+      query: (id) => ({ url: `/task-tags/${id}`, method: 'DELETE' }),
+      invalidatesTags: ['TaskTag', 'Task', 'TaskCalendar'],
+    }),
   }),
 });
 
@@ -349,4 +450,14 @@ export const {
   useUpdateTagMutation,
   useDeleteTagMutation,
   useActivityInfiniteQuery,
+  useListTasksQuery,
+  useTaskCalendarQuery,
+  useCreateTaskMutation,
+  useUpdateTaskMutation,
+  useSetTaskStatusMutation,
+  useDeleteTaskMutation,
+  useListTaskTagsQuery,
+  useCreateTaskTagMutation,
+  useUpdateTaskTagMutation,
+  useDeleteTaskTagMutation,
 } = api;
