@@ -1,7 +1,16 @@
 'use client';
 
 import * as Popover from '@radix-ui/react-popover';
-import { Check, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
+import {
+  CalendarRange,
+  Check,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  Repeat,
+  SkipForward,
+  Trash2,
+} from 'lucide-react';
 import { useState } from 'react';
 
 import { TagPill } from '@/components/tags/tag-pill';
@@ -16,24 +25,26 @@ import { useToast } from '@/components/ui/toast';
 import {
   useDeleteTaskMutation,
   useSetTaskStatusMutation,
+  useSetVirtualTaskStatusMutation,
   useUpdateTaskMutation,
 } from '@/lib/api/api';
 import { errorMessage } from '@/lib/api/baseQuery';
 import { cn } from '@/lib/cn';
 import { PRIORITIES, PRIORITY_LABELS, type Priority } from '@/lib/priority';
-import type { Task, TaskTag } from '@/lib/types';
+import type { TaskTag, TaskView } from '@/lib/types';
 import { PriorityDot } from './priority';
 
-export function TaskRow({ task, tags }: { task: Task; tags: TaskTag[] }) {
+export function TaskRow({ task, tags }: { task: TaskView; tags: TaskTag[] }) {
   const toast = useToast();
   const [setStatus] = useSetTaskStatusMutation();
+  const [setVirtualStatus] = useSetVirtualTaskStatusMutation();
   const [updateTask] = useUpdateTaskMutation();
   const [deleteTask] = useDeleteTaskMutation();
 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(task.content);
   // Optimistic target for the checkbox. Ignored once the server value matches it.
-  const [pendingStatus, setPendingStatus] = useState<Task['status'] | null>(null);
+  const [pendingStatus, setPendingStatus] = useState<TaskView['status'] | null>(null);
 
   const status =
     pendingStatus && pendingStatus !== task.status ? pendingStatus : task.status;
@@ -42,29 +53,88 @@ export function TaskRow({ task, tags }: { task: Task; tags: TaskTag[] }) {
   const attached = tags.filter((t) => task.tagIds.includes(t.id));
   const available = tags.filter((t) => !task.tagIds.includes(t.id));
 
+  const isRoutine = task.routineItemId != null;
+  const isRange = task.kind === 'range' || task.rangeTaskId != null;
+  const sourceLink = task.routineItemId
+    ? { routineItemId: task.routineItemId }
+    : task.rangeTaskId
+      ? { rangeTaskId: task.rangeTaskId }
+      : null;
+  // A virtual occurrence has no stored row yet — it must be materialized before
+  // it can carry an edit.
+  const canSkip = task.virtual && sourceLink !== null;
+
+  /** Ensure a real row exists for this day; resolves to its id. */
+  const materialize = async (): Promise<string> => {
+    if (!task.virtual || !sourceLink) return task.id;
+    const row = await setVirtualStatus({
+      date: task.day,
+      status: task.status,
+      ...sourceLink,
+    }).unwrap();
+    return row.id;
+  };
+
   const toggle = async () => {
     const next = done ? 'pending' : 'done';
     setPendingStatus(next);
     try {
-      await setStatus({ id: task.id, status: next }).unwrap();
+      if (task.virtual && sourceLink) {
+        await setVirtualStatus({ date: task.day, status: next, ...sourceLink }).unwrap();
+      } else {
+        await setStatus({ id: task.id, status: next }).unwrap();
+      }
     } catch (err) {
       setPendingStatus(null);
       toast.error(errorMessage(err, 'Could not update the task'));
     }
   };
 
-  const saveEdit = async () => {
-    if (!draft.trim()) return;
+  const skipToday = async () => {
+    if (!sourceLink) return;
     try {
-      await updateTask({ id: task.id, content: draft.trim() }).unwrap();
+      await setVirtualStatus({
+        date: task.day,
+        status: 'skipped',
+        ...sourceLink,
+      }).unwrap();
+    } catch (err) {
+      toast.error(errorMessage(err, 'Could not skip the task'));
+    }
+  };
+
+  const saveEdit = async () => {
+    const next = draft.trim();
+    if (!next || next === task.content) {
+      setEditing(false);
+      return;
+    }
+    try {
+      const id = await materialize();
+      await updateTask({ id, content: next }).unwrap();
       setEditing(false);
     } catch (err) {
       toast.error(errorMessage(err, 'Could not save'));
     }
   };
 
-  const setPriority = (p: Priority) => updateTask({ id: task.id, priority: p });
-  const setTags = (tagIds: string[]) => updateTask({ id: task.id, tagIds });
+  const setPriority = async (p: Priority) => {
+    try {
+      const id = await materialize();
+      await updateTask({ id, priority: p }).unwrap();
+    } catch (err) {
+      toast.error(errorMessage(err, 'Could not change priority'));
+    }
+  };
+
+  const setTags = async (tagIds: string[]) => {
+    try {
+      const id = await materialize();
+      await updateTask({ id, tagIds }).unwrap();
+    } catch (err) {
+      toast.error(errorMessage(err, 'Could not change tags'));
+    }
+  };
 
   return (
     <div className="group hover:bg-surface-2/60 flex items-start gap-2.5 rounded-lg px-2 py-1.5">
@@ -97,10 +167,23 @@ export function TaskRow({ task, tags }: { task: Task; tags: TaskTag[] }) {
         ) : (
           <p
             className={cn(
-              'text-sm leading-snug',
+              'flex items-center gap-1.5 text-sm leading-snug',
               done ? 'text-ink-faint line-through' : 'text-ink',
             )}
           >
+            {isRoutine ? (
+              <Repeat
+                size={12}
+                className="text-ink-faint shrink-0"
+                aria-label="Routine"
+              />
+            ) : isRange ? (
+              <CalendarRange
+                size={12}
+                className="text-ink-faint shrink-0"
+                aria-label="Range task"
+              />
+            ) : null}
             {task.content}
           </p>
         )}
@@ -186,13 +269,23 @@ export function TaskRow({ task, tags }: { task: Task; tags: TaskTag[] }) {
                 {PRIORITY_LABELS[p]}
               </DropdownItem>
             ))}
-            <DropdownItem
-              danger
-              icon={<Trash2 size={15} />}
-              onSelect={() => void deleteTask(task.id)}
-            >
-              Delete
-            </DropdownItem>
+            {canSkip ? (
+              <DropdownItem
+                icon={<SkipForward size={15} />}
+                onSelect={() => void skipToday()}
+              >
+                Skip today
+              </DropdownItem>
+            ) : null}
+            {!task.virtual ? (
+              <DropdownItem
+                danger
+                icon={<Trash2 size={15} />}
+                onSelect={() => void deleteTask(task.id)}
+              >
+                Delete
+              </DropdownItem>
+            ) : null}
           </DropdownContent>
         </Dropdown>
       </div>

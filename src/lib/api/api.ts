@@ -1,5 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 
+import { toDateKey } from '../date';
 import type {
   ActivityResponse,
   AuthResponse,
@@ -7,12 +8,15 @@ import type {
   JournalContent,
   JournalEntry,
   JournalListResponse,
+  RangeMode,
+  RoutineItem,
   Tag,
   TagWithCount,
   Task,
   TaskCalendarResponse,
   TaskStatus,
   TaskTag,
+  TaskView,
   Thought,
   ThoughtListResponse,
   ThoughtStats,
@@ -56,6 +60,7 @@ export const api = createApi({
     'Task',
     'TaskCalendar',
     'TaskTag',
+    'Routine',
     'Journal',
   ],
   endpoints: (build) => ({
@@ -332,7 +337,7 @@ export const api = createApi({
 
     // --- tasks -----------------------------------------------------------
     listTasks: build.query<
-      { items: Task[] },
+      { items: TaskView[] },
       {
         from?: string;
         to?: string;
@@ -347,6 +352,7 @@ export const api = createApi({
         params: clean({
           from: args.from,
           to: args.to,
+          today: toDateKey(new Date()),
           status: args.status,
           q: args.q,
           tags: args.tags?.length ? args.tags.join(',') : undefined,
@@ -363,6 +369,7 @@ export const api = createApi({
         url: '/tasks/calendar',
         params: clean({
           month: args.month,
+          today: toDateKey(new Date()),
           status: args.status,
           tags: args.tags?.length ? args.tags.join(',') : undefined,
           priority: args.priorities?.length ? args.priorities.join(',') : undefined,
@@ -372,7 +379,16 @@ export const api = createApi({
     }),
     createTask: build.mutation<
       Task,
-      { content: string; date: string; priority?: number; tagIds?: string[] }
+      | { content: string; date: string; priority?: number; tagIds?: string[] }
+      | {
+          kind: 'range';
+          content: string;
+          startDate: string;
+          endDate: string;
+          rangeMode: RangeMode;
+          priority?: number;
+          tagIds?: string[];
+        }
     >({
       query: (data) => ({ url: '/tasks', method: 'POST', data }),
       invalidatesTags: ['Task', 'TaskCalendar'],
@@ -398,9 +414,59 @@ export const api = createApi({
       }),
       invalidatesTags: ['Task', 'TaskCalendar'],
     }),
+    /** Materialize + set status on a virtual routine / range-daily occurrence. */
+    setVirtualTaskStatus: build.mutation<
+      Task,
+      {
+        date: string;
+        status: TaskStatus;
+        routineItemId?: string;
+        rangeTaskId?: string;
+      }
+    >({
+      query: (data) => ({ url: '/tasks/virtual/status', method: 'PUT', data }),
+      invalidatesTags: ['Task', 'TaskCalendar'],
+    }),
     deleteTask: build.mutation<void, string>({
       query: (id) => ({ url: `/tasks/${id}`, method: 'DELETE' }),
       invalidatesTags: ['Task', 'TaskCalendar'],
+    }),
+
+    // --- routine -------------------------------------------------------
+    getRoutine: build.query<RoutineItem[], void>({
+      query: () => ({ url: '/routine' }),
+      transformResponse: (r: { items: RoutineItem[] }) => r.items,
+      providesTags: ['Routine'],
+    }),
+    addRoutineItem: build.mutation<
+      RoutineItem,
+      { content: string; priority?: number; tagIds?: string[] }
+    >({
+      query: (data) => ({ url: '/routine/items', method: 'POST', data }),
+      invalidatesTags: ['Routine', 'Task', 'TaskCalendar'],
+    }),
+    updateRoutineItem: build.mutation<
+      RoutineItem,
+      { id: string; content?: string; priority?: number; tagIds?: string[] }
+    >({
+      query: ({ id, ...data }) => ({
+        url: `/routine/items/${id}`,
+        method: 'PATCH',
+        data,
+      }),
+      invalidatesTags: ['Routine', 'Task', 'TaskCalendar'],
+    }),
+    removeRoutineItem: build.mutation<void, string>({
+      query: (id) => ({ url: `/routine/items/${id}`, method: 'DELETE' }),
+      invalidatesTags: ['Routine', 'Task', 'TaskCalendar'],
+    }),
+    reorderRoutineItems: build.mutation<{ items: RoutineItem[] }, string[]>({
+      query: (itemIds) => ({
+        url: '/routine/items/order',
+        method: 'PUT',
+        data: { itemIds },
+      }),
+      invalidatesTags: ['Routine', 'Task', 'TaskCalendar'],
     }),
 
     // --- task tags -----------------------------------------------------
@@ -508,7 +574,13 @@ export const {
   useCreateTaskMutation,
   useUpdateTaskMutation,
   useSetTaskStatusMutation,
+  useSetVirtualTaskStatusMutation,
   useDeleteTaskMutation,
+  useGetRoutineQuery,
+  useAddRoutineItemMutation,
+  useUpdateRoutineItemMutation,
+  useRemoveRoutineItemMutation,
+  useReorderRoutineItemsMutation,
   useListTaskTagsQuery,
   useCreateTaskTagMutation,
   useUpdateTaskTagMutation,

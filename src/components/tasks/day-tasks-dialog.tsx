@@ -49,7 +49,7 @@ export function DayTasksDialog({
           ) : (
             <div className="flex max-h-[50vh] flex-col gap-0.5 overflow-y-auto">
               {pending.map((task) => (
-                <TaskRow key={task.id} task={task} tags={tags} />
+                <TaskRow key={task.viewKey} task={task} tags={tags} />
               ))}
 
               {showCompleted && done.length > 0 ? (
@@ -59,7 +59,7 @@ export function DayTasksDialog({
                     <span className="bg-border h-px flex-1" />
                   </div>
                   {done.map((task) => (
-                    <TaskRow key={task.id} task={task} tags={tags} />
+                    <TaskRow key={task.viewKey} task={task} tags={tags} />
                   ))}
                 </>
               ) : null}

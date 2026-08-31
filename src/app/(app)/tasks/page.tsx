@@ -1,12 +1,22 @@
 'use client';
 
-import { CalendarDays, ChevronLeft, ChevronRight, List, Tags } from 'lucide-react';
+import {
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  List,
+  Plus,
+  Repeat,
+  Tags,
+} from 'lucide-react';
 import { useState } from 'react';
 
 import { PageHeader } from '@/components/layout/page-header';
 import { CalendarGrid } from '@/components/tasks/calendar-grid';
 import { DayTasksDialog } from '@/components/tasks/day-tasks-dialog';
 import { ListView } from '@/components/tasks/list-view';
+import { NewTaskDialog } from '@/components/tasks/new-task-dialog';
+import { RoutineManager } from '@/components/tasks/routine-manager';
 import { TaskFilterBar, type TaskFilters } from '@/components/tasks/task-filter-bar';
 import { TaskTagManager } from '@/components/tasks/task-tag-manager';
 import { Button, IconButton } from '@/components/ui/button';
@@ -69,11 +79,29 @@ export default function TasksPage() {
               ))}
             </div>
 
+            <RoutineManager
+              trigger={
+                <Button size="sm" variant="secondary">
+                  <Repeat size={14} />
+                  Routine
+                </Button>
+              }
+            />
+
             <TaskTagManager
               trigger={
                 <Button size="sm" variant="secondary">
                   <Tags size={14} />
                   Tags
+                </Button>
+              }
+            />
+
+            <NewTaskDialog
+              trigger={
+                <Button size="sm">
+                  <Plus size={14} />
+                  New task
                 </Button>
               }
             />

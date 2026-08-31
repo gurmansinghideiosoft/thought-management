@@ -121,17 +121,55 @@ export interface TaskTag {
   updatedAt: string;
 }
 
-export type TaskStatus = 'pending' | 'done';
+export type TaskStatus = 'pending' | 'done' | 'skipped';
+export type TaskKind = 'single' | 'range';
+export type RangeMode = 'once' | 'daily';
 
+/** The stored task entity — what create / update / status mutations return. */
 export interface Task {
   id: string;
   content: string;
-  /** `YYYY-MM-DD` */
-  date: string;
+  /** `YYYY-MM-DD`. `null` on a `range` row (it uses start/end instead). */
+  date: string | null;
   status: TaskStatus;
   completedAt: string | null;
   priority: number;
   tagIds: string[];
+  kind: TaskKind;
+  startDate: string | null;
+  endDate: string | null;
+  rangeMode: RangeMode | null;
+  /** Set on a materialized instance of a routine item / range-daily task. */
+  routineItemId: string | null;
+  rangeTaskId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * A task as it appears on one calendar day — what `GET /tasks` returns. Either a
+ * stored row (`virtual: false`) or a synthetic occurrence of a routine item or
+ * `range/daily` task (`virtual: true`, `id` = `routine:<itemId>` / `range:<id>`).
+ */
+export interface TaskView extends Task {
+  /** Unique per (task, day) — use as the React key. */
+  viewKey: string;
+  /** The calendar day this occurrence belongs to (`YYYY-MM-DD`). */
+  day: string;
+  date: string;
+  virtual: boolean;
+}
+
+export interface RoutineItem {
+  id: string;
+  content: string;
+  priority: number;
+  tagIds: string[];
+  position: number;
+  /** Inclusive `YYYY-MM-DD` the item started applying. */
+  activeFrom: string;
+  /** Inclusive last day it applies, or `null` while still active. */
+  activeTo: string | null;
   createdAt: string;
   updatedAt: string;
 }

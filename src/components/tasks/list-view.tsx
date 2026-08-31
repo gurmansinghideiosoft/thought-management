@@ -3,7 +3,7 @@
 import { CenteredSpinner, EmptyState } from '@/components/ui/misc';
 import { useListTasksQuery, useListTaskTagsQuery } from '@/lib/api/api';
 import { prettyDayShort } from '@/lib/date';
-import type { Task } from '@/lib/types';
+import type { TaskView } from '@/lib/types';
 import { AddTaskForm } from './add-task-form';
 import type { TaskFilters } from './task-filter-bar';
 import { TaskRow } from './task-row';
@@ -42,11 +42,11 @@ export function ListView({
     );
   }
 
-  const byDate = new Map<string, Task[]>();
+  const byDate = new Map<string, TaskView[]>();
   for (const task of items) {
-    const list = byDate.get(task.date) ?? [];
+    const list = byDate.get(task.day) ?? [];
     list.push(task);
-    byDate.set(task.date, list);
+    byDate.set(task.day, list);
   }
 
   return (
@@ -62,10 +62,12 @@ export function ListView({
             </h2>
             <div className="mt-1 flex flex-col gap-0.5">
               {pending.map((task) => (
-                <TaskRow key={task.id} task={task} tags={tags} />
+                <TaskRow key={task.viewKey} task={task} tags={tags} />
               ))}
               {showCompleted &&
-                done.map((task) => <TaskRow key={task.id} task={task} tags={tags} />)}
+                done.map((task) => (
+                  <TaskRow key={task.viewKey} task={task} tags={tags} />
+                ))}
             </div>
             <div className="mt-1.5 px-2 opacity-60 focus-within:opacity-100 hover:opacity-100">
               <AddTaskForm date={date} />
