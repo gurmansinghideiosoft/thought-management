@@ -8,8 +8,9 @@ import { PageHeader } from '@/components/layout/page-header';
 import { CreateThoughtDialog } from '@/components/thoughts/create-thought-dialog';
 import { ThoughtCard } from '@/components/thoughts/thought-card';
 import { Input } from '@/components/ui/input';
-import { CenteredSpinner, EmptyState } from '@/components/ui/misc';
+import { EmptyState } from '@/components/ui/misc';
 import { Select } from '@/components/ui/select';
+import { SkeletonCards } from '@/components/ui/skeleton';
 import { type ListThoughtsArgs, useListThoughtsQuery } from '@/lib/api/api';
 import { useDebounced } from '@/lib/use-debounced';
 
@@ -23,7 +24,7 @@ const SORTS: readonly { value: Sort; label: string }[] = [
 ];
 
 const STATUSES = [
-  { value: '', label: 'All' },
+  { value: 'all', label: 'All' },
   { value: 'active', label: 'Active' },
   { value: 'archived', label: 'Archived' },
 ] as const;
@@ -31,13 +32,13 @@ const STATUSES = [
 export default function ThoughtsPage() {
   const [q, setQ] = useState('');
   const [sort, setSort] = useState<Sort>('recent');
-  const [status, setStatus] = useState<'active' | 'archived' | ''>('');
+  const [status, setStatus] = useState<'active' | 'archived' | 'all'>('all');
   const debouncedQ = useDebounced(q, 300);
 
   const { data, isLoading, isFetching } = useListThoughtsQuery({
     q: debouncedQ || undefined,
     sort,
-    status: status || undefined,
+    status: status === 'all' ? undefined : status,
     limit: 50,
   });
 
@@ -77,7 +78,7 @@ export default function ThoughtsPage() {
         </div>
 
         {isLoading ? (
-          <CenteredSpinner />
+          <SkeletonCards />
         ) : items.length === 0 ? (
           <EmptyState
             icon={<Lightbulb size={22} />}

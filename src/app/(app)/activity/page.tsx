@@ -6,7 +6,8 @@ import { useState } from 'react';
 
 import { PageHeader } from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
-import { CenteredSpinner, EmptyState } from '@/components/ui/misc';
+import { EmptyState } from '@/components/ui/misc';
+import { SkeletonRows } from '@/components/ui/skeleton';
 import { useActivityInfiniteQuery } from '@/lib/api/api';
 import { cn } from '@/lib/cn';
 import { relativeTime } from '@/lib/format';
@@ -54,7 +55,7 @@ export default function ActivityPage() {
         </div>
 
         {isLoading ? (
-          <CenteredSpinner />
+          <SkeletonRows />
         ) : items.length === 0 ? (
           <EmptyState title="Nothing yet" description="Add an entry to any thought." />
         ) : (

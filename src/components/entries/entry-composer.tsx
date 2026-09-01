@@ -4,7 +4,7 @@ import { Link2, Paperclip, SendHorizonal, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 import { Button, IconButton } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Input, Textarea } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
 import { useAddEntryMutation, useUploadEntryFileMutation } from '@/lib/api/api';
 import { errorMessage } from '@/lib/api/baseQuery';
@@ -118,7 +118,7 @@ export function EntryComposer({ thoughtId }: { thoughtId: string }) {
             </>
           ) : null}
 
-          <textarea
+          <Textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => {
@@ -135,7 +135,7 @@ export function EntryComposer({ thoughtId }: { thoughtId: string }) {
                   ? 'Add a note about this link…'
                   : 'Add to this thought…'
             }
-            className="border-hairline bg-surface text-ink placeholder:text-ink-faint focus:border-accent/50 focus:ring-accent/20 max-h-40 min-h-[40px] flex-1 resize-none rounded-lg border px-3 py-2 text-sm leading-relaxed focus:ring-2 focus:outline-none"
+            className="max-h-40 min-h-[40px] flex-1 resize-none"
           />
 
           <Button

@@ -48,7 +48,7 @@ export function BannerBar({
         trigger={
           <button
             type="button"
-            className="bg-overlay/80 text-ink hover:bg-overlay absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] font-medium opacity-0 shadow-sm backdrop-blur transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+            className="bg-overlay/80 text-ink hover:bg-overlay absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] font-medium opacity-0 shadow-sm backdrop-blur transition-opacity group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100"
           >
             <ImageIcon size={13} />
             Change background

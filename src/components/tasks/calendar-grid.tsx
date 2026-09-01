@@ -78,7 +78,7 @@ export function CalendarGrid({
                   }}
                   role="button"
                   tabIndex={-1}
-                  className="text-ink-faint hover:bg-surface hover:text-ink rounded-md p-0.5 opacity-0 transition-opacity group-hover:opacity-100"
+                  className="text-ink-faint hover:bg-surface hover:text-ink rounded-md p-0.5 opacity-0 transition-opacity group-hover:opacity-100 pointer-coarse:opacity-100"
                   aria-label="Add task"
                 >
                   <Plus size={13} />

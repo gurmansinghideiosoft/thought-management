@@ -7,6 +7,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { BannerPicker } from '@/components/banners/banner-picker';
 import { IconButton } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/input';
 import { CenteredSpinner, Spinner } from '@/components/ui/misc';
 import { useToast } from '@/components/ui/toast';
 import {
@@ -204,7 +205,7 @@ export function MessageThread({
         onSubmit={submit}
         className="border-hairline bg-paper/70 relative z-10 flex items-end gap-2 border-t px-3 py-2.5 backdrop-blur"
       >
-        <textarea
+        <Textarea
           value={draft}
           onChange={(e) => {
             setDraft(e.target.value);
@@ -219,13 +220,13 @@ export function MessageThread({
           }}
           rows={1}
           placeholder="Write a message…"
-          className="border-hairline bg-field text-ink placeholder:text-ink-faint focus:border-accent/55 focus:ring-accent/20 max-h-32 min-h-[38px] flex-1 resize-none rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:outline-none"
+          className="max-h-32 min-h-[38px] flex-1 resize-none"
         />
         <IconButton
           label="Send"
+          type="submit"
           className="bg-accent text-accent-fg hover:bg-accent size-9 shrink-0 hover:brightness-95"
           disabled={sending || !draft.trim()}
-          onClick={(e) => void submit(e as unknown as React.FormEvent)}
         >
           <SendHorizontal size={15} />
         </IconButton>
@@ -273,7 +274,7 @@ function MessageBubble({
         >
           {message.body}
         </div>
-        <span className="text-ink-faint mb-0.5 shrink-0 text-[10px] opacity-0 transition-opacity group-hover:opacity-100">
+        <span className="text-ink-faint mb-0.5 shrink-0 text-[10px] opacity-0 transition-opacity group-hover:opacity-100 pointer-coarse:opacity-100">
           {format(new Date(message.createdAt), 'h:mm a')}
         </span>
         {onDelete ? (
@@ -281,7 +282,7 @@ function MessageBubble({
             type="button"
             aria-label="Delete message"
             onClick={onDelete}
-            className="text-ink-faint hover:text-danger mb-0.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+            className="text-ink-faint hover:text-danger mb-0.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 pointer-coarse:opacity-100"
           >
             <Trash2 size={12} />
           </button>

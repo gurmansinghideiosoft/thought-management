@@ -20,6 +20,7 @@ import { RoutineManager } from '@/components/tasks/routine-manager';
 import { TaskFilterBar, type TaskFilters } from '@/components/tasks/task-filter-bar';
 import { TaskTagManager } from '@/components/tasks/task-tag-manager';
 import { Button, IconButton } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/cn';
 import { monthRange, prettyMonth, shiftMonth, toMonthKey } from '@/lib/date';
 
@@ -46,12 +47,15 @@ export default function TasksPage() {
         title="Tasks"
         actions={
           <div className="flex items-center gap-2">
-            <label className="text-ink-muted flex cursor-pointer items-center gap-1.5 text-[13px]">
-              <input
-                type="checkbox"
+            <label
+              htmlFor="tasks-show-completed"
+              className="text-ink-muted flex cursor-pointer items-center gap-1.5 text-[13px] select-none"
+            >
+              <Checkbox
+                id="tasks-show-completed"
                 checked={showCompleted}
-                onChange={(e) => setShowCompleted(e.target.checked)}
-                className="accent-accent size-3.5"
+                onCheckedChange={setShowCompleted}
+                aria-label="Show completed tasks"
               />
               Show completed
             </label>

@@ -23,8 +23,9 @@ import {
   DropdownItem,
   DropdownTrigger,
 } from '@/components/ui/dropdown';
-import { CenteredSpinner, EmptyState } from '@/components/ui/misc';
+import { EmptyState } from '@/components/ui/misc';
 import { Input } from '@/components/ui/input';
+import { SkeletonRows } from '@/components/ui/skeleton';
 import { useListCredentialsQuery } from '@/lib/api/api';
 import { cn } from '@/lib/cn';
 import type { CredentialCategory, CredentialMeta } from '@/lib/types';
@@ -155,7 +156,7 @@ export function VaultDashboard() {
         ) : null}
 
         {isLoading ? (
-          <CenteredSpinner />
+          <SkeletonRows />
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={<KeyRound size={22} />}

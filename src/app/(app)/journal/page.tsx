@@ -10,7 +10,8 @@ import { JournalCalendar } from '@/components/journal/journal-calendar';
 import { JournalEntryRow } from '@/components/journal/journal-entry-row';
 import { JournalHero } from '@/components/journal/journal-hero';
 import { Button } from '@/components/ui/button';
-import { CenteredSpinner, EmptyState } from '@/components/ui/misc';
+import { EmptyState } from '@/components/ui/misc';
+import { SkeletonRows } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast';
 import {
   useJournalStreakQuery,
@@ -106,7 +107,7 @@ export default function JournalPage() {
 
           <main className="min-w-0 lg:col-start-1 lg:row-start-1">
             {isLoading ? (
-              <CenteredSpinner />
+              <SkeletonRows />
             ) : entries.length === 0 ? (
               <EmptyState
                 icon={<NotebookPen size={22} />}

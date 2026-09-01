@@ -3,7 +3,6 @@
 import * as Popover from '@radix-ui/react-popover';
 import {
   CalendarRange,
-  Check,
   MoreHorizontal,
   Pencil,
   Plus,
@@ -15,6 +14,7 @@ import { useState } from 'react';
 
 import { TagPill } from '@/components/tags/tag-pill';
 import { IconButton } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dropdown,
   DropdownContent,
@@ -133,18 +133,12 @@ export function TaskRow({ task, tags }: { task: TaskView; tags: TaskTag[] }) {
 
   return (
     <div className="group hover:bg-surface-2/60 flex items-start gap-2.5 rounded-lg px-2 py-1.5">
-      <button
-        onClick={toggle}
-        className={cn(
-          'mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-[5px] border transition-colors',
-          done
-            ? 'border-accent bg-accent text-accent-fg'
-            : 'border-hairline hover:border-accent',
-        )}
+      <Checkbox
+        checked={done}
+        onCheckedChange={() => void toggle()}
         aria-label={done ? 'Mark pending' : 'Mark done'}
-      >
-        {done ? <Check size={11} strokeWidth={3} /> : null}
-      </button>
+        className="mt-0.5"
+      />
 
       <div className="min-w-0 flex-1">
         {editing ? (
@@ -205,7 +199,10 @@ export function TaskRow({ task, tags }: { task: TaskView; tags: TaskTag[] }) {
         {available.length > 0 ? (
           <Popover.Root>
             <Popover.Trigger asChild>
-              <IconButton label="Add tag" className="opacity-0 group-hover:opacity-100">
+              <IconButton
+                label="Add tag"
+                className="opacity-0 transition-opacity group-hover:opacity-100 pointer-coarse:opacity-100"
+              >
                 <Plus size={14} />
               </IconButton>
             </Popover.Trigger>
@@ -237,7 +234,7 @@ export function TaskRow({ task, tags }: { task: TaskView; tags: TaskTag[] }) {
           <DropdownTrigger asChild>
             <IconButton
               label="Task actions"
-              className="opacity-0 group-hover:opacity-100"
+              className="opacity-0 transition-opacity group-hover:opacity-100 pointer-coarse:opacity-100"
             >
               <MoreHorizontal size={14} />
             </IconButton>

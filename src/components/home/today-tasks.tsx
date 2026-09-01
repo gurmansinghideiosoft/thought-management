@@ -1,12 +1,13 @@
 'use client';
 
-import { ArrowRight, Check, ListTodo } from 'lucide-react';
+import { ArrowRight, ListTodo } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
 import { AddTaskForm } from '@/components/tasks/add-task-form';
 import { PriorityDot } from '@/components/tasks/priority';
-import { CenteredSpinner } from '@/components/ui/misc';
+import { Checkbox } from '@/components/ui/checkbox';
+import { SkeletonRows } from '@/components/ui/skeleton';
 import { useListTasksQuery } from '@/lib/api/api';
 import { cn } from '@/lib/cn';
 import { toDateKey } from '@/lib/date';
@@ -43,19 +44,12 @@ export function TodayTasks() {
     const done = statusOf(task) === 'done';
     return (
       <li className="flex items-start gap-2.5 py-1">
-        <button
-          type="button"
-          onClick={() => void toggle(task)}
+        <Checkbox
+          checked={done}
+          onCheckedChange={() => void toggle(task)}
           aria-label={done ? 'Mark not done' : 'Mark done'}
-          className={cn(
-            'mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-[5px] border transition-colors',
-            done
-              ? 'border-accent bg-accent text-accent-fg'
-              : 'border-hairline hover:border-accent',
-          )}
-        >
-          {done ? <Check size={11} strokeWidth={3} /> : null}
-        </button>
+          className="mt-0.5"
+        />
         <span
           className={cn(
             'min-w-0 flex-1 text-[13.5px] leading-snug',
@@ -85,7 +79,7 @@ export function TodayTasks() {
       </div>
 
       {isLoading ? (
-        <CenteredSpinner />
+        <SkeletonRows bare rows={3} />
       ) : (
         <>
           {items.length === 0 ? (

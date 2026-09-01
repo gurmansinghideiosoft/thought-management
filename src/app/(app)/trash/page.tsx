@@ -5,7 +5,8 @@ import { RotateCcw, Trash2 } from 'lucide-react';
 
 import { PageHeader } from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
-import { CenteredSpinner, EmptyState } from '@/components/ui/misc';
+import { EmptyState } from '@/components/ui/misc';
+import { SkeletonRows } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast';
 import { useListTrashQuery, useRestoreThoughtMutation } from '@/lib/api/api';
 import { errorMessage } from '@/lib/api/baseQuery';
@@ -25,7 +26,7 @@ export default function TrashPage() {
       />
       <div className="content-column flex-1 px-4 py-5 sm:px-6">
         {isLoading ? (
-          <CenteredSpinner />
+          <SkeletonRows rows={4} />
         ) : items.length === 0 ? (
           <EmptyState
             icon={<Trash2 size={22} />}

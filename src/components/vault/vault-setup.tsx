@@ -5,6 +5,7 @@ import { useState } from 'react';
 
 import { PageHeader } from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Field, PasswordInput } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
 import { errorMessage } from '@/lib/api/baseQuery';
@@ -86,12 +87,16 @@ export function VaultSetup() {
                 />
               )}
             </Field>
-            <label className="text-ink-muted flex items-start gap-2 text-[13px]">
-              <input
-                type="checkbox"
+            <label
+              htmlFor="vault-ack"
+              className="text-ink-muted flex cursor-pointer items-start gap-2 text-[13px] select-none"
+            >
+              <Checkbox
+                id="vault-ack"
                 checked={ack}
-                onChange={(e) => setAck(e.target.checked)}
-                className="accent-accent mt-0.5 size-3.5"
+                onCheckedChange={setAck}
+                aria-label="I understand losing this password means losing my credentials"
+                className="mt-0.5"
               />
               I understand that losing this password means losing my saved credentials.
             </label>

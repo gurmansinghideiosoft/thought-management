@@ -102,7 +102,7 @@ export function EntryItem({
         ) : null}
 
         {readOnly ? null : (
-          <div className="ml-auto flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 data-[open=true]:opacity-100">
+          <div className="ml-auto flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 data-[open=true]:opacity-100 pointer-coarse:opacity-100">
             <IconButton
               label={entry.starred ? 'Unstar' : 'Star'}
               onClick={() =>
