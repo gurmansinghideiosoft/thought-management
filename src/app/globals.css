@@ -1,26 +1,160 @@
-@import "tailwindcss";
+@import '@heroui/styles';
+@plugin '@tailwindcss/typography';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Dark mode is driven by a `.dark` class on <html> (next-themes). */
+@variant dark (&:where(.dark, .dark *));
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+/*
+ * Editorial dark-ink palette. We override HeroUI's semantic CSS variables so
+ * every HeroUI component and every hand-styled element share one system.
+ * Placed in `@layer base` *after* the HeroUI import so cascade ties resolve to us.
+ */
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --radius: 0.625rem;
+
+    --background: #fbfaf7; /* warm paper */
+    --foreground: #1a1712; /* near-black ink */
+    --surface: #ffffff;
+    --surface-foreground: var(--foreground);
+    --surface-secondary: #f4f2ec;
+    --surface-tertiary: #ece9e0;
+    --overlay: #ffffff;
+    --overlay-foreground: var(--foreground);
+    --muted: #6b6459;
+    --default: #f0ede5;
+    --default-foreground: var(--foreground);
+    --accent: #c14a26; /* confident rust */
+    --accent-foreground: #fdf7f3;
+    --border: #e7e2d8;
+    --separator: #ece8de;
+    --focus: var(--accent);
+    --link: var(--accent);
+    --danger: #b23b2e;
+    --danger-foreground: #fdf3f1;
+    --warning: #b8791f;
+    --success: #3f7d58;
+
+    --field-background: #ffffff;
+    --field-foreground: var(--foreground);
+    --field-placeholder: #a5a094;
+    --field-border: var(--border);
+
+    --backdrop: rgba(26, 23, 18, 0.28);
+  }
+
+  .dark {
+    color-scheme: dark;
+
+    --background: #16130d;
+    --foreground: #f2eee5;
+    --surface: #201c15;
+    --surface-foreground: var(--foreground);
+    --surface-secondary: #262119;
+    --surface-tertiary: #2f2921;
+    --overlay: #221e17;
+    --overlay-foreground: var(--foreground);
+    --muted: #a49c8f;
+    --default: #2b261e;
+    --default-foreground: var(--foreground);
+    --accent: #e0673d;
+    --accent-foreground: #1a1006;
+    --border: #322d25;
+    --separator: #2b271f;
+    --danger: #e07a5f;
+    --danger-foreground: #1a0f0c;
+    --warning: #d69a3c;
+    --success: #6bbd8f;
+
+    --field-background: #201c15;
+    --field-foreground: var(--foreground);
+    --field-placeholder: #7c756a;
+    --field-border: var(--border);
+
+    --backdrop: rgba(0, 0, 0, 0.55);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 }
 
+/* Tailwind utility tokens, aliased to the HeroUI variables above. */
+@theme inline {
+  --color-paper: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-secondary);
+  --color-surface-3: var(--surface-tertiary);
+  --color-overlay: var(--overlay);
+  --color-field: var(--field-background);
+  --color-ink: var(--foreground);
+  --color-ink-muted: var(--muted);
+  --color-ink-faint: color-mix(in oklab, var(--muted) 62%, var(--background));
+  --color-hairline: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-foreground);
+  --color-danger: var(--danger);
+  --color-star: #d99a2b;
+
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: var(--font-serif), ui-serif, 'Iowan Old Style', Georgia, serif;
+}
+
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  height: 100%;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--accent) 22%, transparent);
+}
+
+/* Narrow column for genuine reading views (timeline, journal). */
+@utility reading-column {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 44rem;
+}
+
+/* Wider column for list / dashboard pages. */
+@utility content-column {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 64rem;
+}
+
+/* --- Journal editor prose (Tiptap + @tailwindcss/typography) --- */
+.prose {
+  --tw-prose-body: var(--foreground);
+  --tw-prose-headings: var(--foreground);
+  --tw-prose-links: var(--accent);
+  --tw-prose-bold: var(--foreground);
+  --tw-prose-quotes: var(--muted);
+  --tw-prose-quote-borders: var(--border);
+  --tw-prose-hr: var(--border);
+  --tw-prose-bullets: var(--muted);
+  --tw-prose-counters: var(--muted);
+  --tw-prose-code: var(--foreground);
+}
+.prose :where(h1, h2, h3) {
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: var(--field-placeholder);
+}
+.tiptap:focus {
+  outline: none;
 }
