@@ -2,46 +2,72 @@
 
 import { ArrowRight, Check, ListTodo } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
 
+import { AddTaskForm } from '@/components/tasks/add-task-form';
 import { PriorityDot } from '@/components/tasks/priority';
 import { CenteredSpinner } from '@/components/ui/misc';
 import { useListTasksQuery } from '@/lib/api/api';
 import { cn } from '@/lib/cn';
 import { toDateKey } from '@/lib/date';
+import { useTaskToggle } from '@/lib/tasks/use-task-toggle';
 import type { TaskView } from '@/lib/types';
-
-function TaskLine({ task }: { task: TaskView }) {
-  const done = task.status === 'done';
-  return (
-    <li className="flex items-start gap-2.5 py-1">
-      <span
-        className={cn(
-          'mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-[5px] border',
-          done ? 'border-accent bg-accent text-accent-fg' : 'border-hairline',
-        )}
-      >
-        {done ? <Check size={11} strokeWidth={3} /> : null}
-      </span>
-      <span
-        className={cn(
-          'min-w-0 flex-1 text-[13.5px] leading-snug',
-          done ? 'text-ink-faint line-through' : 'text-ink',
-        )}
-      >
-        {task.content}
-      </span>
-      <PriorityDot priority={task.priority} className="mt-1.5" />
-    </li>
-  );
-}
 
 export function TodayTasks() {
   const today = toDateKey(new Date());
   const { data, isLoading } = useListTasksQuery({ from: today, to: today });
+  const toggleTask = useTaskToggle();
+  // Optimistic overrides while a toggle is in flight, keyed by viewKey.
+  const [pending, setPending] = useState<Record<string, 'pending' | 'done'>>({});
 
   const items = (data?.items ?? []).filter((t) => t.day === today);
-  const pending = items.filter((t) => t.status === 'pending');
-  const done = items.filter((t) => t.status === 'done');
+  const statusOf = (t: TaskView) => pending[t.viewKey] ?? t.status;
+  const pendingList = items.filter((t) => statusOf(t) === 'pending');
+  const doneList = items.filter((t) => statusOf(t) === 'done');
+
+  const toggle = async (t: TaskView) => {
+    const next = statusOf(t) === 'done' ? 'pending' : 'done';
+    setPending((p) => ({ ...p, [t.viewKey]: next }));
+    try {
+      await toggleTask(t, next);
+    } catch {
+      setPending((p) => {
+        const rest = { ...p };
+        delete rest[t.viewKey];
+        return rest;
+      });
+    }
+  };
+
+  const Line = ({ task }: { task: TaskView }) => {
+    const done = statusOf(task) === 'done';
+    return (
+      <li className="flex items-start gap-2.5 py-1">
+        <button
+          type="button"
+          onClick={() => void toggle(task)}
+          aria-label={done ? 'Mark not done' : 'Mark done'}
+          className={cn(
+            'mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-[5px] border transition-colors',
+            done
+              ? 'border-accent bg-accent text-accent-fg'
+              : 'border-hairline hover:border-accent',
+          )}
+        >
+          {done ? <Check size={11} strokeWidth={3} /> : null}
+        </button>
+        <span
+          className={cn(
+            'min-w-0 flex-1 text-[13.5px] leading-snug',
+            done ? 'text-ink-faint line-through' : 'text-ink',
+          )}
+        >
+          {task.content}
+        </span>
+        <PriorityDot priority={task.priority} className="mt-1.5" />
+      </li>
+    );
+  };
 
   return (
     <section className="border-hairline bg-surface flex flex-col rounded-xl border p-5">
@@ -60,33 +86,41 @@ export function TodayTasks() {
 
       {isLoading ? (
         <CenteredSpinner />
-      ) : items.length === 0 ? (
-        <p className="text-ink-faint py-6 text-center text-sm">
-          Nothing scheduled for today.
-        </p>
       ) : (
         <>
-          <p className="text-ink-muted mb-1.5 text-[12px]">
-            {done.length} done · {pending.length} to go
-          </p>
-          <ul className="flex flex-col">
-            {pending.map((t) => (
-              <TaskLine key={t.viewKey} task={t} />
-            ))}
-          </ul>
-          {done.length > 0 ? (
+          {items.length === 0 ? (
+            <p className="text-ink-faint py-3 text-center text-sm">
+              Nothing scheduled for today.
+            </p>
+          ) : (
             <>
-              <div className="text-ink-faint my-2 flex items-center gap-2 text-[11px] tracking-wide uppercase">
-                <span>Completed</span>
-                <span className="bg-border h-px flex-1" />
-              </div>
+              <p className="text-ink-muted mb-1.5 text-[12px]">
+                {doneList.length} done · {pendingList.length} to go
+              </p>
               <ul className="flex flex-col">
-                {done.map((t) => (
-                  <TaskLine key={t.viewKey} task={t} />
+                {pendingList.map((t) => (
+                  <Line key={t.viewKey} task={t} />
                 ))}
               </ul>
+              {doneList.length > 0 ? (
+                <>
+                  <div className="text-ink-faint my-2 flex items-center gap-2 text-[11px] tracking-wide uppercase">
+                    <span>Completed</span>
+                    <span className="bg-border h-px flex-1" />
+                  </div>
+                  <ul className="flex flex-col">
+                    {doneList.map((t) => (
+                      <Line key={t.viewKey} task={t} />
+                    ))}
+                  </ul>
+                </>
+              ) : null}
             </>
-          ) : null}
+          )}
+
+          <div className="border-hairline mt-3 border-t pt-3">
+            <AddTaskForm date={today} />
+          </div>
         </>
       )}
     </section>

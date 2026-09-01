@@ -92,7 +92,15 @@ export const api = createApi({
     logout: build.mutation<void, { refreshToken: string | null }>({
       query: (data) => ({ url: '/auth/logout', method: 'POST', data }),
     }),
-    updateMe: build.mutation<{ user: User }, { username?: string; name?: string }>({
+    updateMe: build.mutation<
+      { user: User },
+      {
+        username?: string;
+        name?: string;
+        homeBanner?: string | null;
+        journalBanner?: string | null;
+      }
+    >({
       query: (data) => ({ url: '/auth/me', method: 'PATCH', data }),
       invalidatesTags: ['Me'],
     }),
@@ -258,6 +266,20 @@ export const api = createApi({
         method: 'POST',
       }),
       invalidatesTags: ['Conversations'],
+    }),
+    setConversationBackground: build.mutation<
+      void,
+      { conversationId: string; banner: string | null; thoughtId?: string | null }
+    >({
+      query: ({ conversationId, banner }) => ({
+        url: `/conversations/${conversationId}/background`,
+        method: 'PUT',
+        data: { banner },
+      }),
+      invalidatesTags: (_r, _e, { thoughtId }) => [
+        'Conversations',
+        ...(thoughtId ? [{ type: 'ThoughtConversation' as const, id: thoughtId }] : []),
+      ],
     }),
 
     // --- timeline (infinite; "next page" = older entries) --------------
@@ -695,6 +717,7 @@ export const {
   useSendMessageMutation,
   useDeleteMessageMutation,
   useMarkConversationReadMutation,
+  useSetConversationBackgroundMutation,
   useTimelineInfiniteQuery,
   useLazyGetEntryQuery,
   useAddEntryMutation,

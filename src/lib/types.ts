@@ -6,6 +6,9 @@ export interface User {
   name: string;
   /** `null` only for accounts created before usernames existed. */
   username: string | null;
+  /** Chosen banner ids (see `src/lib/banners.ts`); `null` = default. */
+  homeBanner: string | null;
+  journalBanner: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -79,6 +82,8 @@ export interface Conversation {
   thoughtId: string | null;
   memberIds: string[];
   lastMessageAt: string;
+  /** The current user's chat-wallpaper choice for this conversation. */
+  background: string | null;
 }
 
 /** A row in the conversation list, decorated for display. */
@@ -90,6 +95,7 @@ export interface ConversationSummary {
   lastMessage: { body: string; authorId: string; at: string } | null;
   lastMessageAt: string;
   unreadCount: number;
+  background: string | null;
 }
 
 export interface Message {

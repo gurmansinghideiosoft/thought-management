@@ -44,7 +44,11 @@ export default function ConversationPage({
           </Link>
         ) : null}
       </div>
-      <MessageThread conversationId={id} />
+      <MessageThread
+        conversationId={id}
+        background={conv?.background ?? null}
+        thoughtId={conv?.thought?.id ?? null}
+      />
     </div>
   );
 }

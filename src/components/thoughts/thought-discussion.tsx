@@ -59,7 +59,11 @@ export function ThoughtDiscussion({ thoughtId }: { thoughtId: string }) {
               <Spinner />
             </div>
           ) : (
-            <MessageThread conversationId={conv.id} />
+            <MessageThread
+              conversationId={conv.id}
+              background={conv.background}
+              thoughtId={thoughtId}
+            />
           )}
         </div>
       ) : null}

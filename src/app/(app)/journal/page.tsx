@@ -4,6 +4,7 @@ import { NotebookPen, PenLine } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { BannerBar } from '@/components/banners/banner-bar';
 import { PageHeader } from '@/components/layout/page-header';
 import { JournalCard } from '@/components/journal/journal-card';
 import { JournalListItem } from '@/components/journal/journal-list-item';
@@ -12,6 +13,8 @@ import { CenteredSpinner, EmptyState } from '@/components/ui/misc';
 import { useToast } from '@/components/ui/toast';
 import {
   useListJournalInfiniteQuery,
+  useMeQuery,
+  useUpdateMeMutation,
   useUpsertJournalByDateMutation,
 } from '@/lib/api/api';
 import { errorMessage } from '@/lib/api/baseQuery';
@@ -22,6 +25,16 @@ export default function JournalPage() {
   const toast = useToast();
   const [starting, setStarting] = useState(false);
   const [upsert] = useUpsertJournalByDateMutation();
+  const { data: me } = useMeQuery();
+  const [updateMe] = useUpdateMeMutation();
+
+  const setBanner = async (journalBanner: string | null) => {
+    try {
+      await updateMe({ journalBanner }).unwrap();
+    } catch (err) {
+      toast.error(errorMessage(err, 'Could not change the background'));
+    }
+  };
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useListJournalInfiniteQuery();
@@ -52,6 +65,16 @@ export default function JournalPage() {
           </Button>
         }
       />
+
+      <BannerBar
+        value={me?.user.journalBanner ?? null}
+        onChange={setBanner}
+        className="h-[22vh] max-h-[260px] min-h-[140px]"
+      >
+        <p className="font-serif text-lg font-medium text-white drop-shadow sm:text-xl">
+          End the day by writing it down.
+        </p>
+      </BannerBar>
 
       <div className="content-column flex-1 px-4 py-6 sm:px-6">
         {isLoading ? (
