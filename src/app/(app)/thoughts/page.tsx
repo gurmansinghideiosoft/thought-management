@@ -3,6 +3,7 @@
 import { Lightbulb, Search } from 'lucide-react';
 import { useState } from 'react';
 
+import { InvitesBanner } from '@/components/invites/invites-banner';
 import { PageHeader } from '@/components/layout/page-header';
 import { CreateThoughtDialog } from '@/components/thoughts/create-thought-dialog';
 import { ThoughtCard } from '@/components/thoughts/thought-card';
@@ -51,6 +52,8 @@ export default function ThoughtsPage() {
       />
 
       <div className="content-column flex-1 px-4 py-6 sm:px-6">
+        <InvitesBanner />
+
         <div className="mb-5 flex flex-wrap items-center gap-2">
           <div className="relative min-w-[220px] flex-1">
             <Search

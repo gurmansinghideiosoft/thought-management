@@ -36,6 +36,8 @@ export interface TagWithCount extends Tag {
   entryCount: number;
 }
 
+export type ThoughtRole = 'owner' | 'collaborator';
+
 export interface Thought {
   id: string;
   title: string;
@@ -47,6 +49,23 @@ export interface Thought {
   deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  /** How the current user relates to this thought (list + detail responses). */
+  role?: ThoughtRole;
+  /** The owner, on rows shared with the current user. */
+  sharedBy?: PublicUser;
+}
+
+export interface ThoughtInvite {
+  id: string;
+  thought: { id: string; title: string };
+  invitedBy: PublicUser;
+  createdAt: string;
+}
+
+export interface ThoughtMembers {
+  owner: PublicUser;
+  collaborators: PublicUser[];
+  pendingInvites: { id: string; email: string }[];
 }
 
 export type EntryKind = 'note' | 'link' | 'file';

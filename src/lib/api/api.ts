@@ -18,7 +18,9 @@ import type {
   TaskTag,
   TaskView,
   Thought,
+  ThoughtInvite,
   ThoughtListResponse,
+  ThoughtMembers,
   ThoughtStats,
   TimelineResponse,
   User,
@@ -62,6 +64,8 @@ export const api = createApi({
     'TaskTag',
     'Routine',
     'Journal',
+    'ThoughtMembers',
+    'Invites',
   ],
   endpoints: (build) => ({
     // --- auth ------------------------------------------------------------
@@ -136,6 +140,60 @@ export const api = createApi({
     restoreThought: build.mutation<Thought, string>({
       query: (id) => ({ url: `/thoughts/${id}/restore`, method: 'POST' }),
       invalidatesTags: ['ThoughtList', 'Trash', 'Activity'],
+    }),
+
+    // --- sharing -----------------------------------------------------
+    thoughtMembers: build.query<ThoughtMembers, string>({
+      query: (thoughtId) => ({ url: `/thoughts/${thoughtId}/members` }),
+      providesTags: (_r, _e, thoughtId) => [{ type: 'ThoughtMembers', id: thoughtId }],
+    }),
+    inviteToThought: build.mutation<
+      { created: unknown[]; skipped: { email: string; reason: string }[] },
+      { thoughtId: string; emails: string[] }
+    >({
+      query: ({ thoughtId, emails }) => ({
+        url: `/thoughts/${thoughtId}/invites`,
+        method: 'POST',
+        data: { emails },
+      }),
+      invalidatesTags: (_r, _e, { thoughtId }) => [
+        { type: 'ThoughtMembers', id: thoughtId },
+      ],
+    }),
+    revokeInvite: build.mutation<void, { thoughtId: string; inviteId: string }>({
+      query: ({ thoughtId, inviteId }) => ({
+        url: `/thoughts/${thoughtId}/invites/${inviteId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_r, _e, { thoughtId }) => [
+        { type: 'ThoughtMembers', id: thoughtId },
+      ],
+    }),
+    removeMember: build.mutation<void, { thoughtId: string; userId: string }>({
+      query: ({ thoughtId, userId }) => ({
+        url: `/thoughts/${thoughtId}/members/${userId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_r, _e, { thoughtId }) => [
+        { type: 'ThoughtMembers', id: thoughtId },
+        'ThoughtList',
+        { type: 'Thought', id: thoughtId },
+      ],
+    }),
+    myInvites: build.query<ThoughtInvite[], void>({
+      query: () => ({ url: '/invites' }),
+      transformResponse: (r: { items: ThoughtInvite[] }) => r.items,
+      providesTags: ['Invites'],
+    }),
+    respondToInvite: build.mutation<
+      { thoughtId: string; status: string },
+      { id: string; action: 'accept' | 'decline' }
+    >({
+      query: ({ id, action }) => ({
+        url: `/invites/${id}/${action}`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Invites', 'ThoughtList'],
     }),
 
     // --- timeline (infinite; "next page" = older entries) --------------
@@ -560,6 +618,12 @@ export const {
   useSetThoughtArchivedMutation,
   useDeleteThoughtMutation,
   useRestoreThoughtMutation,
+  useThoughtMembersQuery,
+  useInviteToThoughtMutation,
+  useRevokeInviteMutation,
+  useRemoveMemberMutation,
+  useMyInvitesQuery,
+  useRespondToInviteMutation,
   useTimelineInfiniteQuery,
   useLazyGetEntryQuery,
   useAddEntryMutation,

@@ -19,7 +19,9 @@ export default function ThoughtDetailPage({
 }) {
   const { id } = use(params);
   const { data: thought, isLoading, isError } = useGetThoughtQuery(id);
-  const { data: tags } = useListTagsQuery(id);
+  const isCollaborator = thought?.role === 'collaborator';
+  // Tag CRUD is owner-only on the API; collaborators just read the thought's tags.
+  const { data: tags } = useListTagsQuery(id, { skip: isCollaborator });
   const [filters, setFilters] = useState<TimelineFilterState>({});
 
   const timelineArgs = useMemo(
@@ -48,8 +50,8 @@ export default function ThoughtDetailPage({
     <div className="flex min-h-full flex-1 flex-col">
       <ThoughtHeader thought={thought} />
       <TimelineFilters tags={tags ?? []} value={filters} onChange={setFilters} />
-      <Timeline args={timelineArgs} tags={thought.tags} />
-      <EntryComposer thoughtId={id} />
+      <Timeline args={timelineArgs} tags={thought.tags} readOnly={isCollaborator} />
+      {isCollaborator ? null : <EntryComposer thoughtId={id} />}
     </div>
   );
 }
