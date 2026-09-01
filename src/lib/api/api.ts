@@ -6,6 +6,8 @@ import type {
   AuthResponse,
   Conversation,
   ConversationSummary,
+  CredentialCipher,
+  CredentialMeta,
   Entry,
   JournalContent,
   JournalEntry,
@@ -29,6 +31,7 @@ import type {
   ThoughtStats,
   TimelineResponse,
   User,
+  VaultKeystore,
 } from '../types';
 import { axiosBaseQuery } from './baseQuery';
 
@@ -74,6 +77,9 @@ export const api = createApi({
     'Conversations',
     'Messages',
     'ThoughtConversation',
+    'Vault',
+    'Credentials',
+    'Credential',
   ],
   endpoints: (build) => ({
     // --- auth ------------------------------------------------------------
@@ -704,6 +710,60 @@ export const api = createApi({
       query: (id) => ({ url: `/journal/${id}`, method: 'DELETE' }),
       invalidatesTags: ['Journal'],
     }),
+
+    // --- vault (zero-knowledge; server only ever sees ciphertext) -----
+    vaultKeystore: build.query<{ keystore: VaultKeystore | null }, void>({
+      query: () => ({ url: '/vault' }),
+      providesTags: ['Vault'],
+    }),
+    setupVault: build.mutation<VaultKeystore, Omit<VaultKeystore, 'id'>>({
+      query: (data) => ({ url: '/vault/setup', method: 'POST', data }),
+      invalidatesTags: ['Vault'],
+    }),
+    rekeyVault: build.mutation<VaultKeystore, Omit<VaultKeystore, 'id'>>({
+      query: (data) => ({ url: '/vault/rekey', method: 'PUT', data }),
+      invalidatesTags: ['Vault'],
+    }),
+    resetVault: build.mutation<void, void>({
+      query: () => ({ url: '/vault', method: 'DELETE' }),
+      invalidatesTags: ['Vault', 'Credentials'],
+    }),
+    listCredentials: build.query<{ items: CredentialMeta[] }, void>({
+      query: () => ({ url: '/vault/credentials' }),
+      providesTags: ['Credentials'],
+    }),
+    getCredential: build.query<CredentialCipher, string>({
+      query: (id) => ({ url: `/vault/credentials/${id}` }),
+      providesTags: (_r, _e, id) => [{ type: 'Credential', id }],
+    }),
+    createCredential: build.mutation<
+      CredentialCipher,
+      { name: string; category: string; tags: string[]; cipher: string }
+    >({
+      query: (data) => ({ url: '/vault/credentials', method: 'POST', data }),
+      invalidatesTags: ['Credentials'],
+    }),
+    updateCredential: build.mutation<
+      CredentialCipher,
+      {
+        id: string;
+        name?: string;
+        category?: string;
+        tags?: string[];
+        cipher?: string;
+      }
+    >({
+      query: ({ id, ...data }) => ({
+        url: `/vault/credentials/${id}`,
+        method: 'PATCH',
+        data,
+      }),
+      invalidatesTags: (_r, _e, { id }) => ['Credentials', { type: 'Credential', id }],
+    }),
+    deleteCredential: build.mutation<void, string>({
+      query: (id) => ({ url: `/vault/credentials/${id}`, method: 'DELETE' }),
+      invalidatesTags: ['Credentials'],
+    }),
   }),
 });
 
@@ -774,4 +834,14 @@ export const {
   useUpsertJournalByDateMutation,
   useUpdateJournalEntryMutation,
   useDeleteJournalEntryMutation,
+  useVaultKeystoreQuery,
+  useSetupVaultMutation,
+  useRekeyVaultMutation,
+  useResetVaultMutation,
+  useListCredentialsQuery,
+  useGetCredentialQuery,
+  useLazyGetCredentialQuery,
+  useCreateCredentialMutation,
+  useUpdateCredentialMutation,
+  useDeleteCredentialMutation,
 } = api;

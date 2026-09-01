@@ -9,6 +9,7 @@ import { CenteredSpinner } from '@/components/ui/misc';
 import { tokenStore } from '@/lib/auth/tokenStore';
 import { useSession } from '@/lib/auth/useSession';
 import { RealtimeProvider } from '@/lib/realtime/realtime-provider';
+import { VaultProvider } from '@/lib/vault/vault-context';
 
 export default function AppLayout({ children }: LayoutProps<'/'>) {
   const { status, user, signOut } = useSession();
@@ -33,9 +34,11 @@ export default function AppLayout({ children }: LayoutProps<'/'>) {
 
   return (
     <RealtimeProvider>
-      <AppShell user={user} onSignOut={signOut}>
-        {children}
-      </AppShell>
+      <VaultProvider>
+        <AppShell user={user} onSignOut={signOut}>
+          {children}
+        </AppShell>
+      </VaultProvider>
     </RealtimeProvider>
   );
 }

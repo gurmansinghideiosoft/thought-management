@@ -5,6 +5,7 @@ import {
   Activity,
   CalendarDays,
   Home,
+  KeyRound,
   Lightbulb,
   LogOut,
   MessagesSquare,
@@ -29,6 +30,7 @@ const NAV = [
   { href: '/tasks', label: 'Tasks', icon: CalendarDays },
   { href: '/messages', label: 'Messages', icon: MessagesSquare },
   { href: '/journal', label: 'Journal', icon: NotebookPen },
+  { href: '/vault', label: 'Vault', icon: KeyRound },
   { href: '/activity', label: 'Activity', icon: Activity },
   { href: '/trash', label: 'Trash', icon: Trash2 },
 ] as const;

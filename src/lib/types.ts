@@ -282,3 +282,51 @@ export interface JournalStreak {
   longest: number;
   writtenToday: boolean;
 }
+
+// --- vault -----------------------------------------------------------
+
+export interface KdfParams {
+  /** Memory cost, KiB. */
+  m: number;
+  /** Time cost (iterations). */
+  t: number;
+  /** Parallelism. */
+  p: number;
+}
+
+export interface VaultKeystore {
+  id: string;
+  kdfSalt: string;
+  kdfParams: KdfParams;
+  protectedKey: string;
+  verifier: string;
+}
+
+export type CredentialCategory = 'login' | 'api' | 'note' | 'other';
+
+/** Listed / filtered without unlocking. */
+export interface CredentialMeta {
+  id: string;
+  name: string;
+  category: CredentialCategory;
+  tags: string[];
+  updatedAt: string;
+}
+
+/** A single credential with its encrypted blob. */
+export interface CredentialCipher extends CredentialMeta {
+  cipher: string;
+}
+
+export interface CredentialField {
+  label: string;
+  value: string;
+  /** Masked in the UI, with reveal + copy. */
+  secret: boolean;
+}
+
+/** The decrypted contents of `cipher`. */
+export interface CredentialPayload {
+  fields: CredentialField[];
+  notes: string;
+}
