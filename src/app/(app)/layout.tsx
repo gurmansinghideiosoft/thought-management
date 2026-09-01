@@ -8,6 +8,7 @@ import { UsernameSetup } from '@/components/onboarding/username-setup';
 import { CenteredSpinner } from '@/components/ui/misc';
 import { tokenStore } from '@/lib/auth/tokenStore';
 import { useSession } from '@/lib/auth/useSession';
+import { RealtimeProvider } from '@/lib/realtime/realtime-provider';
 
 export default function AppLayout({ children }: LayoutProps<'/'>) {
   const { status, user, signOut } = useSession();
@@ -31,8 +32,10 @@ export default function AppLayout({ children }: LayoutProps<'/'>) {
   }
 
   return (
-    <AppShell user={user} onSignOut={signOut}>
-      {children}
-    </AppShell>
+    <RealtimeProvider>
+      <AppShell user={user} onSignOut={signOut}>
+        {children}
+      </AppShell>
+    </RealtimeProvider>
   );
 }

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 import { api, useLogoutMutation, useMeQuery } from '../api/api';
+import { connectSocket, disconnectSocket } from '../realtime/socket';
 import { useAppDispatch, useAppSelector } from '../hooks';
 import { authLoading, authenticated, signedOut } from './authSlice';
 import { tokenStore } from './tokenStore';
@@ -33,10 +34,12 @@ export function useSession() {
     }
     if (meQuery.data) {
       dispatch(authenticated(meQuery.data.user));
+      connectSocket();
       return;
     }
     if (meQuery.isError) {
       tokenStore.clear();
+      disconnectSocket();
       dispatch(signedOut());
     }
   }, [hasToken, meQuery.isFetching, meQuery.data, meQuery.isError, dispatch]);
@@ -47,6 +50,7 @@ export function useSession() {
     } catch {
       /* revoke best-effort */
     }
+    disconnectSocket();
     tokenStore.clear();
     dispatch(signedOut());
     dispatch(api.util.resetApiState());

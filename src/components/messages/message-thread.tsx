@@ -16,18 +16,14 @@ import {
 } from '@/lib/api/api';
 import { errorMessage } from '@/lib/api/baseQuery';
 import { cn } from '@/lib/cn';
+import { useConversationRealtime } from '@/lib/realtime/useConversationRealtime';
 import type { Message } from '@/lib/types';
 
 export function MessageThread({
   conversationId,
-  typingLabel,
-  onTyping,
   className,
 }: {
   conversationId: string;
-  /** e.g. "@alex is typing…" — wired by the realtime layer. */
-  typingLabel?: string | null;
-  onTyping?: (typing: boolean) => void;
   className?: string;
 }) {
   const toast = useToast();
@@ -37,6 +33,14 @@ export function MessageThread({
   const [send, { isLoading: sending }] = useSendMessageMutation();
   const [deleteMessage] = useDeleteMessageMutation();
   const [markRead] = useMarkConversationReadMutation();
+  const { typingUsers, sendTyping } = useConversationRealtime(conversationId);
+
+  const typingLabel =
+    typingUsers.length > 0
+      ? `${typingUsers
+          .map((u) => (u.username ? `@${u.username}` : u.name || 'Someone'))
+          .join(', ')} ${typingUsers.length === 1 ? 'is' : 'are'} typing…`
+      : null;
 
   const [draft, setDraft] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -97,7 +101,7 @@ export function MessageThread({
     const body = draft.trim();
     if (!body) return;
     setDraft('');
-    onTyping?.(false);
+    sendTyping(false);
     try {
       await send({ conversationId, body }).unwrap();
     } catch (err) {
@@ -157,9 +161,9 @@ export function MessageThread({
           value={draft}
           onChange={(e) => {
             setDraft(e.target.value);
-            onTyping?.(e.target.value.trim().length > 0);
+            sendTyping(e.target.value.trim().length > 0);
           }}
-          onBlur={() => onTyping?.(false)}
+          onBlur={() => sendTyping(false)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
