@@ -1,13 +1,11 @@
 'use client';
 
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { Logo } from '@/components/brand/logo';
+import { LogoMark } from '@/components/brand/logo';
 import { CenteredSpinner } from '@/components/ui/misc';
 import { useSession } from '@/lib/auth/useSession';
-import { bannerFor } from '@/lib/banners';
 
 export default function AuthLayout({ children }: LayoutProps<'/'>) {
   const { status } = useSession();
@@ -21,21 +19,38 @@ export default function AuthLayout({ children }: LayoutProps<'/'>) {
     return <CenteredSpinner />;
   }
 
-  const bg = bannerFor('mountain-dawn');
-
   return (
-    <main className="relative flex min-h-full flex-1 items-center justify-center overflow-hidden px-4 py-10">
-      <Image src={bg.src} alt="" fill priority sizes="100vw" className="object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/45 to-black/70" />
+    <main className="flex min-h-full flex-1 flex-col md:flex-row">
+      {/* Brand panel — the sign-in screen laid out against a margin. */}
+      <aside className="border-hairline bg-surface/70 relative flex shrink-0 flex-col justify-center border-b px-6 py-12 backdrop-blur-sm md:w-[44%] md:max-w-xl md:border-r md:border-b-0 md:px-16 md:py-16 lg:px-24">
+        <span
+          aria-hidden
+          className="bg-hairline absolute top-16 bottom-16 left-16 hidden w-px md:block lg:left-24"
+        />
+        <span
+          aria-hidden
+          className="bg-accent absolute top-16 left-16 hidden size-2 -translate-x-1/2 rounded-full md:block lg:left-24"
+        />
 
-      <div className="relative z-10 w-full max-w-sm">
-        <div className="mb-6 flex flex-col items-center text-center text-white">
-          <Logo markSize={32} textClassName="text-2xl" />
-          <p className="mt-2 text-sm text-white/80">
-            A quiet place for ideas, tasks, and the day just gone.
+        <div className="flex flex-col items-start gap-5 md:pl-10">
+          <LogoMark size={80} className="text-ink hidden md:block" />
+          <LogoMark size={52} className="text-ink md:hidden" />
+          <div>
+            <h1 className="text-ink font-serif text-3xl font-semibold tracking-tight md:text-5xl">
+              Margin
+            </h1>
+            <p className="text-ink-muted mt-2 text-[15px] md:text-base">Room to think.</p>
+          </div>
+          <p className="text-ink-faint hidden max-w-xs text-sm leading-relaxed md:block">
+            Set the day down — tasks, notes, the journal — so your head keeps its open
+            room for the work that needs it.
           </p>
         </div>
-        {children}
+      </aside>
+
+      {/* Form */}
+      <div className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6">
+        <div className="w-full max-w-sm">{children}</div>
       </div>
     </main>
   );

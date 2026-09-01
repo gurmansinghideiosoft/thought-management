@@ -40,8 +40,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="border-hairline bg-surface rounded-2xl border p-6 shadow-2xl shadow-black/30">
-      <h2 className="text-ink mb-5 text-[15px] font-semibold">Sign in</h2>
+    <div className="border-hairline bg-surface shadow-popover rounded-2xl border p-6">
+      <h2 className="text-ink mb-5 font-serif text-lg font-semibold">Sign in</h2>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <Field label="Email" error={errors.email?.message}>
           {({ id }) => (
