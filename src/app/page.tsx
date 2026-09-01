@@ -10,7 +10,7 @@ export default function IndexPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace(tokenStore.hasSession() ? '/thoughts' : '/login');
+    router.replace(tokenStore.hasSession() ? '/home' : '/login');
   }, [router]);
 
   return <CenteredSpinner />;

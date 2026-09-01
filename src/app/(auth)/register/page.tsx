@@ -15,6 +15,11 @@ import { tokenStore } from '@/lib/auth/tokenStore';
 
 const schema = z.object({
   name: z.string().trim().max(100).optional(),
+  username: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .regex(/^[a-z0-9_]{3,30}$/, '3–30 letters, digits or underscores'),
   email: z.email('Enter a valid email'),
   password: z.string().min(8, 'At least 8 characters'),
 });
@@ -35,10 +40,11 @@ export default function RegisterPage() {
       const res = await signup({
         email: values.email,
         password: values.password,
+        username: values.username,
         name: values.name || undefined,
       }).unwrap();
       tokenStore.set(res.accessToken, res.refreshToken);
-      router.replace('/thoughts');
+      router.replace('/home');
     } catch (err) {
       toast.error(errorMessage(err, 'Could not create your account'));
     }
@@ -51,6 +57,20 @@ export default function RegisterPage() {
         <Field label="Name" hint="Optional" error={errors.name?.message}>
           {({ id }) => (
             <Input id={id} autoComplete="name" placeholder="Jane" {...register('name')} />
+          )}
+        </Field>
+        <Field
+          label="Username"
+          hint="How others find you in chat and sharing"
+          error={errors.username?.message}
+        >
+          {({ id }) => (
+            <Input
+              id={id}
+              autoComplete="username"
+              placeholder="jane_doe"
+              {...register('username')}
+            />
           )}
         </Field>
         <Field label="Email" error={errors.email?.message}>

@@ -4,10 +4,15 @@ import { toDateKey } from '../date';
 import type {
   ActivityResponse,
   AuthResponse,
+  Conversation,
+  ConversationSummary,
   Entry,
   JournalContent,
   JournalEntry,
   JournalListResponse,
+  JournalStreak,
+  Message,
+  MessagesResponse,
   RangeMode,
   RoutineItem,
   Tag,
@@ -18,7 +23,9 @@ import type {
   TaskTag,
   TaskView,
   Thought,
+  ThoughtInvite,
   ThoughtListResponse,
+  ThoughtMembers,
   ThoughtStats,
   TimelineResponse,
   User,
@@ -62,6 +69,11 @@ export const api = createApi({
     'TaskTag',
     'Routine',
     'Journal',
+    'ThoughtMembers',
+    'Invites',
+    'Conversations',
+    'Messages',
+    'ThoughtConversation',
   ],
   endpoints: (build) => ({
     // --- auth ------------------------------------------------------------
@@ -74,12 +86,24 @@ export const api = createApi({
     }),
     register: build.mutation<
       AuthResponse,
-      { email: string; password: string; name?: string }
+      { email: string; password: string; username: string; name?: string }
     >({
       query: (data) => ({ url: '/auth/register', method: 'POST', data }),
     }),
     logout: build.mutation<void, { refreshToken: string | null }>({
       query: (data) => ({ url: '/auth/logout', method: 'POST', data }),
+    }),
+    updateMe: build.mutation<
+      { user: User },
+      {
+        username?: string;
+        name?: string;
+        homeBanner?: string | null;
+        journalBanner?: string | null;
+      }
+    >({
+      query: (data) => ({ url: '/auth/me', method: 'PATCH', data }),
+      invalidatesTags: ['Me'],
     }),
 
     // --- thoughts ------------------------------------------------------
@@ -132,6 +156,131 @@ export const api = createApi({
     restoreThought: build.mutation<Thought, string>({
       query: (id) => ({ url: `/thoughts/${id}/restore`, method: 'POST' }),
       invalidatesTags: ['ThoughtList', 'Trash', 'Activity'],
+    }),
+
+    // --- sharing -----------------------------------------------------
+    thoughtMembers: build.query<ThoughtMembers, string>({
+      query: (thoughtId) => ({ url: `/thoughts/${thoughtId}/members` }),
+      providesTags: (_r, _e, thoughtId) => [{ type: 'ThoughtMembers', id: thoughtId }],
+    }),
+    inviteToThought: build.mutation<
+      { created: unknown[]; skipped: { email: string; reason: string }[] },
+      { thoughtId: string; emails: string[] }
+    >({
+      query: ({ thoughtId, emails }) => ({
+        url: `/thoughts/${thoughtId}/invites`,
+        method: 'POST',
+        data: { emails },
+      }),
+      invalidatesTags: (_r, _e, { thoughtId }) => [
+        { type: 'ThoughtMembers', id: thoughtId },
+      ],
+    }),
+    revokeInvite: build.mutation<void, { thoughtId: string; inviteId: string }>({
+      query: ({ thoughtId, inviteId }) => ({
+        url: `/thoughts/${thoughtId}/invites/${inviteId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_r, _e, { thoughtId }) => [
+        { type: 'ThoughtMembers', id: thoughtId },
+      ],
+    }),
+    removeMember: build.mutation<void, { thoughtId: string; userId: string }>({
+      query: ({ thoughtId, userId }) => ({
+        url: `/thoughts/${thoughtId}/members/${userId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_r, _e, { thoughtId }) => [
+        { type: 'ThoughtMembers', id: thoughtId },
+        'ThoughtList',
+        { type: 'Thought', id: thoughtId },
+      ],
+    }),
+    myInvites: build.query<ThoughtInvite[], void>({
+      query: () => ({ url: '/invites' }),
+      transformResponse: (r: { items: ThoughtInvite[] }) => r.items,
+      providesTags: ['Invites'],
+    }),
+    respondToInvite: build.mutation<
+      { thoughtId: string; status: string },
+      { id: string; action: 'accept' | 'decline' }
+    >({
+      query: ({ id, action }) => ({
+        url: `/invites/${id}/${action}`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Invites', 'ThoughtList', 'Conversations'],
+    }),
+
+    // --- conversations & messages -----------------------------------
+    listConversations: build.query<{ items: ConversationSummary[] }, void>({
+      query: () => ({ url: '/conversations' }),
+      providesTags: ['Conversations'],
+    }),
+    thoughtConversation: build.query<Conversation, string>({
+      query: (thoughtId) => ({ url: `/thoughts/${thoughtId}/conversation` }),
+      providesTags: (_r, _e, thoughtId) => [
+        { type: 'ThoughtConversation', id: thoughtId },
+      ],
+    }),
+    createDm: build.mutation<Conversation, { username: string }>({
+      query: (data) => ({ url: '/conversations/dm', method: 'POST', data }),
+      invalidatesTags: ['Conversations'],
+    }),
+    conversationMessages: build.infiniteQuery<MessagesResponse, string, string | null>({
+      infiniteQueryOptions: {
+        initialPageParam: null,
+        getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+      },
+      query: ({ queryArg, pageParam }) => ({
+        url: `/conversations/${queryArg}/messages`,
+        params: clean({ before: pageParam ?? undefined, limit: 30 }),
+      }),
+      providesTags: (_r, _e, conversationId) => [
+        { type: 'Messages', id: conversationId },
+      ],
+    }),
+    sendMessage: build.mutation<Message, { conversationId: string; body: string }>({
+      query: ({ conversationId, body }) => ({
+        url: `/conversations/${conversationId}/messages`,
+        method: 'POST',
+        data: { body },
+      }),
+      // The socket appends live; this catches the no-socket case.
+      invalidatesTags: (_r, _e, { conversationId }) => [
+        { type: 'Messages', id: conversationId },
+        'Conversations',
+      ],
+    }),
+    deleteMessage: build.mutation<void, { conversationId: string; messageId: string }>({
+      query: ({ conversationId, messageId }) => ({
+        url: `/conversations/${conversationId}/messages/${messageId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_r, _e, { conversationId }) => [
+        { type: 'Messages', id: conversationId },
+      ],
+    }),
+    markConversationRead: build.mutation<void, string>({
+      query: (conversationId) => ({
+        url: `/conversations/${conversationId}/read`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Conversations'],
+    }),
+    setConversationBackground: build.mutation<
+      void,
+      { conversationId: string; banner: string | null; thoughtId?: string | null }
+    >({
+      query: ({ conversationId, banner }) => ({
+        url: `/conversations/${conversationId}/background`,
+        method: 'PUT',
+        data: { banner },
+      }),
+      invalidatesTags: (_r, _e, { thoughtId }) => [
+        'Conversations',
+        ...(thoughtId ? [{ type: 'ThoughtConversation' as const, id: thoughtId }] : []),
+      ],
     }),
 
     // --- timeline (infinite; "next page" = older entries) --------------
@@ -502,6 +651,17 @@ export const api = createApi({
       }),
       providesTags: ['Journal'],
     }),
+    journalStreak: build.query<JournalStreak, void>({
+      query: () => ({
+        url: '/journal/streak',
+        params: { today: toDateKey(new Date()) },
+      }),
+      providesTags: ['Journal'],
+    }),
+    journalCalendar: build.query<{ month: string; dates: string[] }, string>({
+      query: (month) => ({ url: '/journal/calendar', params: { month } }),
+      providesTags: ['Journal'],
+    }),
     getJournalEntry: build.query<JournalEntry, string>({
       query: (id) => ({ url: `/journal/${id}` }),
       providesTags: (_r, _e, id) => [{ type: 'Journal', id }],
@@ -546,6 +706,7 @@ export const {
   useLoginMutation,
   useRegisterMutation,
   useLogoutMutation,
+  useUpdateMeMutation,
   useListThoughtsQuery,
   useListTrashQuery,
   useGetThoughtQuery,
@@ -555,6 +716,20 @@ export const {
   useSetThoughtArchivedMutation,
   useDeleteThoughtMutation,
   useRestoreThoughtMutation,
+  useThoughtMembersQuery,
+  useInviteToThoughtMutation,
+  useRevokeInviteMutation,
+  useRemoveMemberMutation,
+  useMyInvitesQuery,
+  useRespondToInviteMutation,
+  useListConversationsQuery,
+  useThoughtConversationQuery,
+  useCreateDmMutation,
+  useConversationMessagesInfiniteQuery,
+  useSendMessageMutation,
+  useDeleteMessageMutation,
+  useMarkConversationReadMutation,
+  useSetConversationBackgroundMutation,
   useTimelineInfiniteQuery,
   useLazyGetEntryQuery,
   useAddEntryMutation,
@@ -586,6 +761,8 @@ export const {
   useUpdateTaskTagMutation,
   useDeleteTaskTagMutation,
   useListJournalInfiniteQuery,
+  useJournalStreakQuery,
+  useJournalCalendarQuery,
   useGetJournalEntryQuery,
   useUpsertJournalByDateMutation,
   useUpdateJournalEntryMutation,

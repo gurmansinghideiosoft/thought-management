@@ -4,8 +4,20 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  /** `null` only for accounts created before usernames existed. */
+  username: string | null;
+  /** Chosen banner ids (see `src/lib/banners.ts`); `null` = default. */
+  homeBanner: string | null;
+  journalBanner: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+/** The only fields other users can see about someone. */
+export interface PublicUser {
+  id: string;
+  username: string | null;
+  name: string;
 }
 
 export interface AuthResponse {
@@ -27,6 +39,8 @@ export interface TagWithCount extends Tag {
   entryCount: number;
 }
 
+export type ThoughtRole = 'owner' | 'collaborator';
+
 export interface Thought {
   id: string;
   title: string;
@@ -38,6 +52,64 @@ export interface Thought {
   deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  /** How the current user relates to this thought (list + detail responses). */
+  role?: ThoughtRole;
+  /** The owner, on rows shared with the current user. */
+  sharedBy?: PublicUser;
+}
+
+export interface ThoughtInvite {
+  id: string;
+  thought: { id: string; title: string };
+  invitedBy: PublicUser;
+  createdAt: string;
+}
+
+export interface ThoughtMembers {
+  owner: PublicUser;
+  collaborators: PublicUser[];
+  pendingInvites: { id: string; email: string }[];
+}
+
+// --- messaging --------------------------------------------------------
+
+export type ConversationKind = 'thought' | 'dm';
+
+/** Full conversation doc, from `POST /conversations/dm` and thought conversation. */
+export interface Conversation {
+  id: string;
+  kind: ConversationKind;
+  thoughtId: string | null;
+  memberIds: string[];
+  lastMessageAt: string;
+  /** The current user's chat-wallpaper choice for this conversation. */
+  background: string | null;
+}
+
+/** A row in the conversation list, decorated for display. */
+export interface ConversationSummary {
+  id: string;
+  kind: ConversationKind;
+  peer?: PublicUser;
+  thought?: { id: string; title: string };
+  lastMessage: { body: string; authorId: string; at: string } | null;
+  lastMessageAt: string;
+  unreadCount: number;
+  background: string | null;
+}
+
+export interface Message {
+  id: string;
+  conversationId: string;
+  body: string;
+  author: PublicUser;
+  createdAt: string;
+}
+
+export interface MessagesResponse {
+  items: Message[];
+  hasMore: boolean;
+  nextCursor: string | null;
 }
 
 export type EntryKind = 'note' | 'link' | 'file';
@@ -203,4 +275,10 @@ export interface JournalListResponse {
   items: JournalEntry[];
   hasMore: boolean;
   nextCursor: string | null;
+}
+
+export interface JournalStreak {
+  current: number;
+  longest: number;
+  writtenToday: boolean;
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { formatDistanceToNow } from 'date-fns';
-import { Archive, MessagesSquare } from 'lucide-react';
+import { Archive, MessagesSquare, Users } from 'lucide-react';
 import Link from 'next/link';
 
 import { TagPill } from '@/components/tags/tag-pill';
@@ -19,9 +19,24 @@ export function ThoughtCard({ thought }: { thought: Thought }) {
         <h3 className="text-ink font-serif text-[15px] leading-snug font-semibold">
           {thought.title}
         </h3>
-        {thought.status === 'archived' ? (
-          <Archive size={13} className="text-ink-faint mt-1 shrink-0" />
-        ) : null}
+        <div className="mt-1 flex shrink-0 items-center gap-1.5">
+          {thought.role === 'collaborator' ? (
+            <span
+              className="border-hairline text-ink-faint inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px]"
+              title={
+                thought.sharedBy?.username
+                  ? `Shared by @${thought.sharedBy.username}`
+                  : 'Shared with you'
+              }
+            >
+              <Users size={10} />
+              Shared
+            </span>
+          ) : null}
+          {thought.status === 'archived' ? (
+            <Archive size={13} className="text-ink-faint" />
+          ) : null}
+        </div>
       </div>
 
       {thought.description ? (

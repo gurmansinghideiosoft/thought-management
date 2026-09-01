@@ -41,10 +41,12 @@ export function EntryItem({
   entry,
   thoughtId,
   tags,
+  readOnly = false,
 }: {
   entry: Entry;
   thoughtId: string;
   tags: Tag[];
+  readOnly?: boolean;
 }) {
   const toast = useToast();
   const [editing, setEditing] = useState(false);
@@ -99,37 +101,39 @@ export function EntryItem({
           </span>
         ) : null}
 
-        <div className="ml-auto flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 data-[open=true]:opacity-100">
-          <IconButton
-            label={entry.starred ? 'Unstar' : 'Star'}
-            onClick={() =>
-              setStarred({ thoughtId, entryId: entry.id, starred: !entry.starred })
-            }
-          >
-            <Star size={15} className={cn(entry.starred && 'fill-star text-star')} />
-          </IconButton>
-          <Dropdown>
-            <DropdownTrigger asChild>
-              <IconButton label="More">
-                <MoreHorizontal size={15} />
-              </IconButton>
-            </DropdownTrigger>
-            <DropdownContent>
-              <DropdownItem
-                icon={<Pencil size={15} />}
-                onSelect={() => {
-                  setDraft(entry.body);
-                  setEditing(true);
-                }}
-              >
-                Edit text
-              </DropdownItem>
-              <DropdownItem danger icon={<Trash2 size={15} />} onSelect={remove}>
-                Delete
-              </DropdownItem>
-            </DropdownContent>
-          </Dropdown>
-        </div>
+        {readOnly ? null : (
+          <div className="ml-auto flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 data-[open=true]:opacity-100">
+            <IconButton
+              label={entry.starred ? 'Unstar' : 'Star'}
+              onClick={() =>
+                setStarred({ thoughtId, entryId: entry.id, starred: !entry.starred })
+              }
+            >
+              <Star size={15} className={cn(entry.starred && 'fill-star text-star')} />
+            </IconButton>
+            <Dropdown>
+              <DropdownTrigger asChild>
+                <IconButton label="More">
+                  <MoreHorizontal size={15} />
+                </IconButton>
+              </DropdownTrigger>
+              <DropdownContent>
+                <DropdownItem
+                  icon={<Pencil size={15} />}
+                  onSelect={() => {
+                    setDraft(entry.body);
+                    setEditing(true);
+                  }}
+                >
+                  Edit text
+                </DropdownItem>
+                <DropdownItem danger icon={<Trash2 size={15} />} onSelect={remove}>
+                  Delete
+                </DropdownItem>
+              </DropdownContent>
+            </Dropdown>
+          </div>
+        )}
         {entry.starred ? (
           <Star
             size={13}
@@ -205,16 +209,23 @@ export function EntryItem({
         </>
       )}
 
-      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+      <div
+        className="mt-2 flex flex-wrap items-center gap-1.5"
+        hidden={readOnly && attached.length === 0}
+      >
         {attached.map((t) => (
           <TagPill
             key={t.id}
             name={t.name}
             color={t.color}
-            onRemove={() => detachTag({ thoughtId, entryId: entry.id, tagId: t.id })}
+            onRemove={
+              readOnly
+                ? undefined
+                : () => detachTag({ thoughtId, entryId: entry.id, tagId: t.id })
+            }
           />
         ))}
-        {available.length > 0 ? (
+        {!readOnly && available.length > 0 ? (
           <Popover.Root>
             <Popover.Trigger asChild>
               <button className="border-hairline text-ink-faint hover:text-ink inline-flex items-center gap-1 rounded-full border border-dashed px-2 py-1 text-[12px] leading-none transition-colors">

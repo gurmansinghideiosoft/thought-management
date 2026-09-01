@@ -24,19 +24,19 @@ import {
 import { useToast } from '@/components/ui/toast';
 import {
   useDeleteTaskMutation,
-  useSetTaskStatusMutation,
   useSetVirtualTaskStatusMutation,
   useUpdateTaskMutation,
 } from '@/lib/api/api';
 import { errorMessage } from '@/lib/api/baseQuery';
 import { cn } from '@/lib/cn';
 import { PRIORITIES, PRIORITY_LABELS, type Priority } from '@/lib/priority';
+import { useTaskToggle } from '@/lib/tasks/use-task-toggle';
 import type { TaskTag, TaskView } from '@/lib/types';
 import { PriorityDot } from './priority';
 
 export function TaskRow({ task, tags }: { task: TaskView; tags: TaskTag[] }) {
   const toast = useToast();
-  const [setStatus] = useSetTaskStatusMutation();
+  const toggleTask = useTaskToggle();
   const [setVirtualStatus] = useSetVirtualTaskStatusMutation();
   const [updateTask] = useUpdateTaskMutation();
   const [deleteTask] = useDeleteTaskMutation();
@@ -79,14 +79,9 @@ export function TaskRow({ task, tags }: { task: TaskView; tags: TaskTag[] }) {
     const next = done ? 'pending' : 'done';
     setPendingStatus(next);
     try {
-      if (task.virtual && sourceLink) {
-        await setVirtualStatus({ date: task.day, status: next, ...sourceLink }).unwrap();
-      } else {
-        await setStatus({ id: task.id, status: next }).unwrap();
-      }
-    } catch (err) {
+      await toggleTask(task, next);
+    } catch {
       setPendingStatus(null);
-      toast.error(errorMessage(err, 'Could not update the task'));
     }
   };
 

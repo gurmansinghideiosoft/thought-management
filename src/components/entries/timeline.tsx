@@ -7,7 +7,15 @@ import { type TimelineArgs, useTimelineInfiniteQuery } from '@/lib/api/api';
 import type { Tag } from '@/lib/types';
 import { EntryItem } from './entry-item';
 
-export function Timeline({ args, tags }: { args: TimelineArgs; tags: Tag[] }) {
+export function Timeline({
+  args,
+  tags,
+  readOnly = false,
+}: {
+  args: TimelineArgs;
+  tags: Tag[];
+  readOnly?: boolean;
+}) {
   const { data, isLoading, isFetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useTimelineInfiniteQuery(args);
 
@@ -95,6 +103,7 @@ export function Timeline({ args, tags }: { args: TimelineArgs; tags: Tag[] }) {
                 entry={entry}
                 thoughtId={args.thoughtId}
                 tags={tags}
+                readOnly={readOnly}
               />
             ))}
           </div>
