@@ -19,8 +19,9 @@ const serif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: 'Thoughts',
-  description: 'Capture an idea, then grow it one entry at a time.',
+  title: 'Margin',
+  description:
+    'Room to think — your tasks, notes, and journal, set down so your mind doesn’t have to hold them.',
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

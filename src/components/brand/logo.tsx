@@ -1,9 +1,9 @@
 import { cn } from '@/lib/cn';
 
 /**
- * The Thoughts mark — a rounded note/bubble with two lines of writing and a
- * small accent spark. Strokes use `currentColor` so it takes the surrounding
- * text colour; the spark is always the brand accent.
+ * The Margin mark — a page's margin rule, tacked at the top, with a few lines
+ * of writing set back from it. Strokes use `currentColor` so the mark takes
+ * the surrounding text colour; the tack is always the brand accent.
  */
 export function LogoMark({
   size = 28,
@@ -21,29 +21,23 @@ export function LogoMark({
       aria-hidden
       className={className}
     >
+      {/* the margin rule */}
+      <path d="M11 6V27" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+      {/* lines of writing, set back from the rule */}
       <path
-        d="M7 5h13a5 5 0 0 1 5 5v7a5 5 0 0 1-5 5h-7.5L6 28v-6a5 5 0 0 1-5-5v-7a5 5 0 0 1 5-5Z"
-        fill="currentColor"
-        opacity="0.1"
-      />
-      <path
-        d="M7 5h13a5 5 0 0 1 5 5v7a5 5 0 0 1-5 5h-7.5L6 28v-6a5 5 0 0 1-5-5v-7a5 5 0 0 1 5-5Z"
+        d="M16.5 11H27M16.5 16.5H27M16.5 22H23"
         stroke="currentColor"
-        strokeWidth="2.1"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M8.5 11.5h11M8.5 15.5h6.5"
-        stroke="currentColor"
-        strokeWidth="2.1"
+        strokeWidth="2.2"
         strokeLinecap="round"
+        opacity="0.85"
       />
-      <circle cx="25.5" cy="6.5" r="3.5" className="fill-accent" />
+      {/* the tack — what matters, marked in the margin */}
+      <circle cx="11" cy="6" r="3" className="fill-accent" />
     </svg>
   );
 }
 
-/** Mark + "Thoughts" wordmark. Inherits `text-*` from the caller. */
+/** Mark + "Margin" wordmark. Inherits `text-*` from the caller. */
 export function Logo({
   className,
   markSize = 26,
@@ -59,7 +53,7 @@ export function Logo({
       <span
         className={cn('font-serif text-lg font-semibold tracking-tight', textClassName)}
       >
-        Thoughts
+        Margin
       </span>
     </span>
   );
