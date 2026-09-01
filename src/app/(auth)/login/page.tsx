@@ -33,7 +33,7 @@ export default function LoginPage() {
     try {
       const res = await login(values).unwrap();
       tokenStore.set(res.accessToken, res.refreshToken);
-      router.replace('/thoughts');
+      router.replace('/home');
     } catch (err) {
       toast.error(errorMessage(err, 'Could not sign in'));
     }

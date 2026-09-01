@@ -4,6 +4,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import {
   Activity,
   CalendarDays,
+  Home,
   Lightbulb,
   LogOut,
   MessagesSquare,
@@ -22,6 +23,7 @@ import type { User } from '@/lib/types';
 import { ThemeToggle } from './theme-toggle';
 
 const NAV = [
+  { href: '/home', label: 'Home', icon: Home },
   { href: '/thoughts', label: 'Thoughts', icon: Lightbulb },
   { href: '/tasks', label: 'Tasks', icon: CalendarDays },
   { href: '/messages', label: 'Messages', icon: MessagesSquare },

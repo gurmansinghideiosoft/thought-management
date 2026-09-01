@@ -44,7 +44,7 @@ export default function RegisterPage() {
         name: values.name || undefined,
       }).unwrap();
       tokenStore.set(res.accessToken, res.refreshToken);
-      router.replace('/thoughts');
+      router.replace('/home');
     } catch (err) {
       toast.error(errorMessage(err, 'Could not create your account'));
     }
