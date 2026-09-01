@@ -33,7 +33,7 @@ export function Select<T extends string>({
       <RSelect.Trigger
         aria-label={ariaLabel}
         className={cn(
-          'border-hairline bg-field text-ink focus-ring inline-flex h-10 items-center justify-between gap-2 rounded-lg border px-3 text-sm transition-colors',
+          'border-hairline bg-field text-ink focus-halo inline-flex h-10 items-center justify-between gap-2 rounded-lg border px-3 text-sm transition-colors',
           'hover:bg-surface-2 data-[placeholder]:text-ink-faint',
           className,
         )}

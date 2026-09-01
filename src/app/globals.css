@@ -289,8 +289,9 @@ body {
   }
 }
 
-/* One focus treatment for every interactive control. */
-@utility focus-ring {
+/* One focus treatment for every interactive control. Named `focus-halo` to
+ * avoid HeroUI's own `@utility focus-ring`, which is an always-on ring. */
+@utility focus-halo {
   &:focus-visible {
     outline: none;
     box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 35%, transparent);
