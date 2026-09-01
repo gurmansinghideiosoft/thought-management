@@ -3,16 +3,21 @@
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Field, PasswordInput } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
 import { errorMessage } from '@/lib/api/baseQuery';
 import { useVault } from '@/lib/vault/vault-context';
 
-export function RekeyDialog({ trigger }: { trigger: React.ReactNode }) {
+export function RekeyDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const { rekey } = useVault();
   const toast = useToast();
-  const [open, setOpen] = useState(false);
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -29,7 +34,7 @@ export function RekeyDialog({ trigger }: { trigger: React.ReactNode }) {
     try {
       await rekey(current, next);
       toast.success('Master password changed');
-      setOpen(false);
+      onOpenChange(false);
       setCurrent('');
       setNext('');
       setConfirm('');
@@ -41,8 +46,7 @@ export function RekeyDialog({ trigger }: { trigger: React.ReactNode }) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         title="Change master password"
         description="Your credentials are re-wrapped under the new password. They aren't re-encrypted, so this is quick."

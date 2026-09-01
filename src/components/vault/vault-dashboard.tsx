@@ -10,7 +10,7 @@ import {
   Search,
   StickyNote,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { forwardRef, useMemo, useState } from 'react';
 
 import { CredentialDetail } from '@/components/vault/credential-detail';
 import { CredentialDialog } from '@/components/vault/credential-dialog';
@@ -51,6 +51,7 @@ export function VaultDashboard() {
   const [q, setQ] = useState('');
   const [cat, setCat] = useState<CredentialCategory | 'all'>('all');
   const [tag, setTag] = useState<string | null>(null);
+  const [rekeyOpen, setRekeyOpen] = useState(false);
 
   const items = useMemo(() => data?.items ?? [], [data]);
   const allTags = useMemo(
@@ -92,11 +93,12 @@ export function VaultDashboard() {
                 </IconButton>
               </DropdownTrigger>
               <DropdownContent>
-                <RekeyDialog
-                  trigger={<DropdownItem>Change master password</DropdownItem>}
-                />
+                <DropdownItem onSelect={() => setRekeyOpen(true)}>
+                  Change master password
+                </DropdownItem>
               </DropdownContent>
             </Dropdown>
+            <RekeyDialog open={rekeyOpen} onOpenChange={setRekeyOpen} />
           </div>
         }
       />
@@ -194,12 +196,20 @@ export function VaultDashboard() {
   );
 }
 
-function CredentialRow({ credential }: { credential: CredentialMeta }) {
+const CredentialRow = forwardRef<
+  HTMLButtonElement,
+  React.ComponentPropsWithoutRef<'button'> & { credential: CredentialMeta }
+>(function CredentialRow({ credential, className, ...rest }, ref) {
   const Icon = CATEGORY_ICON[credential.category];
   return (
     <button
+      ref={ref}
       type="button"
-      className="group border-hairline bg-surface hover:border-ink-faint/40 flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors"
+      className={cn(
+        'group border-hairline bg-surface hover:border-ink-faint/40 flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors',
+        className,
+      )}
+      {...rest}
     >
       <span className="bg-surface-2 text-ink-faint grid size-9 shrink-0 place-items-center rounded-lg">
         <Icon size={16} />
@@ -220,4 +230,5 @@ function CredentialRow({ credential }: { credential: CredentialMeta }) {
       </div>
     </button>
   );
-}
+});
+CredentialRow.displayName = 'CredentialRow';
