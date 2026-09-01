@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
-import { Field, Input } from '@/components/ui/input';
+import { Field, Input, PasswordInput } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
 import { useLoginMutation } from '@/lib/api/api';
 import { errorMessage } from '@/lib/api/baseQuery';
@@ -40,7 +40,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="border-hairline bg-surface rounded-2xl border p-6">
+    <div className="border-hairline bg-surface rounded-2xl border p-6 shadow-2xl shadow-black/30">
       <h2 className="text-ink mb-5 text-[15px] font-semibold">Sign in</h2>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <Field label="Email" error={errors.email?.message}>
@@ -56,9 +56,8 @@ export default function LoginPage() {
         </Field>
         <Field label="Password" error={errors.password?.message}>
           {({ id }) => (
-            <Input
+            <PasswordInput
               id={id}
-              type="password"
               autoComplete="current-password"
               placeholder="••••••••"
               {...register('password')}

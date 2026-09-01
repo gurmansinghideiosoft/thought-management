@@ -90,6 +90,12 @@ export const api = createApi({
     >({
       query: (data) => ({ url: '/auth/register', method: 'POST', data }),
     }),
+    checkUsername: build.query<{ username: string; available: boolean }, string>({
+      query: (username) => ({
+        url: '/auth/username-available',
+        params: { username },
+      }),
+    }),
     logout: build.mutation<void, { refreshToken: string | null }>({
       query: (data) => ({ url: '/auth/logout', method: 'POST', data }),
     }),
@@ -705,6 +711,7 @@ export const {
   useMeQuery,
   useLoginMutation,
   useRegisterMutation,
+  useCheckUsernameQuery,
   useLogoutMutation,
   useUpdateMeMutation,
   useListThoughtsQuery,

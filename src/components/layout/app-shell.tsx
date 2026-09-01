@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
+import { Logo } from '@/components/brand/logo';
 import { useListConversationsQuery, useMyInvitesQuery } from '@/lib/api/api';
 import { cn } from '@/lib/cn';
 import type { User } from '@/lib/types';
@@ -132,9 +133,9 @@ export function AppShell({
     <div className="flex min-h-full flex-1">
       {/* desktop sidebar */}
       <aside className="border-hairline bg-surface/60 hidden w-60 shrink-0 flex-col border-r px-3 py-4 backdrop-blur-sm md:flex">
-        <div className="text-ink px-2.5 pb-5 font-serif text-lg font-semibold tracking-tight">
-          Thoughts
-        </div>
+        <Link href="/home" className="px-2.5 pb-5">
+          <Logo />
+        </Link>
         <NavLinks />
         <AccountFooter user={user} onSignOut={onSignOut} />
       </aside>
@@ -156,9 +157,7 @@ export function AppShell({
               />
               <Dialog.Content className="border-hairline bg-surface fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r px-3 py-4 shadow-2xl focus:outline-none">
                 <div className="mb-5 flex items-center justify-between px-2.5">
-                  <span className="text-ink font-serif text-lg font-semibold">
-                    Thoughts
-                  </span>
+                  <Logo />
                   <Dialog.Close
                     aria-label="Close menu"
                     className="text-ink-faint hover:bg-surface-2 hover:text-ink rounded-lg p-1"
@@ -171,7 +170,9 @@ export function AppShell({
               </Dialog.Content>
             </Dialog.Portal>
           </Dialog.Root>
-          <span className="text-ink font-serif text-base font-semibold">Thoughts</span>
+          <Link href="/home">
+            <Logo markSize={22} textClassName="text-base" />
+          </Link>
         </div>
 
         <main className="flex min-w-0 flex-1 flex-col">{children}</main>
