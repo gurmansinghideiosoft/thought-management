@@ -1,6 +1,6 @@
 'use client';
 
-import { LogOut, Mail, X } from 'lucide-react';
+import { LogOut, Mail, MessageSquare, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { CenteredSpinner } from '@/components/ui/misc';
 import { useToast } from '@/components/ui/toast';
 import {
+  useCreateDmMutation,
   useInviteToThoughtMutation,
   useMeQuery,
   useRemoveMemberMutation,
@@ -42,9 +43,20 @@ export function ShareDialog({
   const [invite, { isLoading: inviting }] = useInviteToThoughtMutation();
   const [revokeInvite] = useRevokeInviteMutation();
   const [removeMember] = useRemoveMemberMutation();
+  const [createDm] = useCreateDmMutation();
 
   const [raw, setRaw] = useState('');
   const isOwner = role === 'owner';
+
+  const messagePeer = async (u: PublicUser) => {
+    if (!u.username || u.id === me?.user.id) return;
+    try {
+      const conv = await createDm({ username: u.username }).unwrap();
+      router.push(`/messages/${conv.id}`);
+    } catch (err) {
+      toast.error(errorMessage(err, 'Could not open a chat'));
+    }
+  };
 
   const send = async () => {
     const emails = [
@@ -128,6 +140,15 @@ export function ShareDialog({
                 <span className="text-ink min-w-0 flex-1 truncate text-sm">
                   {displayName(data.owner)}
                 </span>
+                {data.owner.username && data.owner.id !== me?.user.id ? (
+                  <IconButton
+                    label={`Message ${displayName(data.owner)}`}
+                    className="size-6"
+                    onClick={() => messagePeer(data.owner)}
+                  >
+                    <MessageSquare size={13} />
+                  </IconButton>
+                ) : null}
                 <span className="text-ink-faint text-[11px]">Owner</span>
               </div>
               {data.collaborators.map((c) => (
@@ -141,6 +162,15 @@ export function ShareDialog({
                   <span className="text-ink min-w-0 flex-1 truncate text-sm">
                     {displayName(c)}
                   </span>
+                  {c.username && c.id !== me?.user.id ? (
+                    <IconButton
+                      label={`Message ${displayName(c)}`}
+                      className="size-6"
+                      onClick={() => messagePeer(c)}
+                    >
+                      <MessageSquare size={13} />
+                    </IconButton>
+                  ) : null}
                   {isOwner ? (
                     <IconButton
                       label={`Remove ${displayName(c)}`}

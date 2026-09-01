@@ -6,6 +6,7 @@ import {
   CalendarDays,
   Lightbulb,
   LogOut,
+  MessagesSquare,
   Menu as MenuIcon,
   NotebookPen,
   Trash2,
@@ -15,6 +16,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
+import { useListConversationsQuery, useMyInvitesQuery } from '@/lib/api/api';
 import { cn } from '@/lib/cn';
 import type { User } from '@/lib/types';
 import { ThemeToggle } from './theme-toggle';
@@ -22,6 +24,7 @@ import { ThemeToggle } from './theme-toggle';
 const NAV = [
   { href: '/thoughts', label: 'Thoughts', icon: Lightbulb },
   { href: '/tasks', label: 'Tasks', icon: CalendarDays },
+  { href: '/messages', label: 'Messages', icon: MessagesSquare },
   { href: '/journal', label: 'Journal', icon: NotebookPen },
   { href: '/activity', label: 'Activity', icon: Activity },
   { href: '/trash', label: 'Trash', icon: Trash2 },
@@ -34,10 +37,20 @@ function initials(user: User): string {
 
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const { data: convs } = useListConversationsQuery();
+  const { data: invites } = useMyInvitesQuery();
+  const unreadMessages = convs?.items.reduce((sum, c) => sum + c.unreadCount, 0) ?? 0;
+  const badgeFor = (href: string): number => {
+    if (href === '/messages') return unreadMessages;
+    if (href === '/thoughts') return invites?.length ?? 0;
+    return 0;
+  };
+
   return (
     <nav className="flex flex-col gap-0.5">
       {NAV.map(({ href, label, icon: Icon }) => {
         const active = pathname === href || pathname.startsWith(`${href}/`);
+        const badge = badgeFor(href);
         return (
           <Link
             key={href}
@@ -58,6 +71,11 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
             />
             <Icon size={16} className={active ? 'text-accent' : undefined} />
             {label}
+            {badge > 0 ? (
+              <span className="bg-accent text-accent-fg ml-auto grid min-w-[18px] place-items-center rounded-full px-1 text-[10px] font-semibold">
+                {badge > 9 ? '9+' : badge}
+              </span>
+            ) : null}
           </Link>
         );
       })}

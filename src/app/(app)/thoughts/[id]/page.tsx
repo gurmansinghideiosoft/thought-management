@@ -8,6 +8,7 @@ import {
   type TimelineFilterState,
   TimelineFilters,
 } from '@/components/entries/timeline-filters';
+import { ThoughtDiscussion } from '@/components/thoughts/thought-discussion';
 import { ThoughtHeader } from '@/components/thoughts/thought-header';
 import { CenteredSpinner, EmptyState } from '@/components/ui/misc';
 import { useGetThoughtQuery, useListTagsQuery } from '@/lib/api/api';
@@ -52,6 +53,7 @@ export default function ThoughtDetailPage({
       <TimelineFilters tags={tags ?? []} value={filters} onChange={setFilters} />
       <Timeline args={timelineArgs} tags={thought.tags} readOnly={isCollaborator} />
       {isCollaborator ? null : <EntryComposer thoughtId={id} />}
+      <ThoughtDiscussion thoughtId={id} />
     </div>
   );
 }

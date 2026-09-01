@@ -4,10 +4,14 @@ import { toDateKey } from '../date';
 import type {
   ActivityResponse,
   AuthResponse,
+  Conversation,
+  ConversationSummary,
   Entry,
   JournalContent,
   JournalEntry,
   JournalListResponse,
+  Message,
+  MessagesResponse,
   RangeMode,
   RoutineItem,
   Tag,
@@ -66,6 +70,9 @@ export const api = createApi({
     'Journal',
     'ThoughtMembers',
     'Invites',
+    'Conversations',
+    'Messages',
+    'ThoughtConversation',
   ],
   endpoints: (build) => ({
     // --- auth ------------------------------------------------------------
@@ -193,7 +200,64 @@ export const api = createApi({
         url: `/invites/${id}/${action}`,
         method: 'POST',
       }),
-      invalidatesTags: ['Invites', 'ThoughtList'],
+      invalidatesTags: ['Invites', 'ThoughtList', 'Conversations'],
+    }),
+
+    // --- conversations & messages -----------------------------------
+    listConversations: build.query<{ items: ConversationSummary[] }, void>({
+      query: () => ({ url: '/conversations' }),
+      providesTags: ['Conversations'],
+    }),
+    thoughtConversation: build.query<Conversation, string>({
+      query: (thoughtId) => ({ url: `/thoughts/${thoughtId}/conversation` }),
+      providesTags: (_r, _e, thoughtId) => [
+        { type: 'ThoughtConversation', id: thoughtId },
+      ],
+    }),
+    createDm: build.mutation<Conversation, { username: string }>({
+      query: (data) => ({ url: '/conversations/dm', method: 'POST', data }),
+      invalidatesTags: ['Conversations'],
+    }),
+    conversationMessages: build.infiniteQuery<MessagesResponse, string, string | null>({
+      infiniteQueryOptions: {
+        initialPageParam: null,
+        getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+      },
+      query: ({ queryArg, pageParam }) => ({
+        url: `/conversations/${queryArg}/messages`,
+        params: clean({ before: pageParam ?? undefined, limit: 30 }),
+      }),
+      providesTags: (_r, _e, conversationId) => [
+        { type: 'Messages', id: conversationId },
+      ],
+    }),
+    sendMessage: build.mutation<Message, { conversationId: string; body: string }>({
+      query: ({ conversationId, body }) => ({
+        url: `/conversations/${conversationId}/messages`,
+        method: 'POST',
+        data: { body },
+      }),
+      // The socket appends live; this catches the no-socket case.
+      invalidatesTags: (_r, _e, { conversationId }) => [
+        { type: 'Messages', id: conversationId },
+        'Conversations',
+      ],
+    }),
+    deleteMessage: build.mutation<void, { conversationId: string; messageId: string }>({
+      query: ({ conversationId, messageId }) => ({
+        url: `/conversations/${conversationId}/messages/${messageId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_r, _e, { conversationId }) => [
+        { type: 'Messages', id: conversationId },
+      ],
+    }),
+    markConversationRead: build.mutation<void, string>({
+      query: (conversationId) => ({
+        url: `/conversations/${conversationId}/read`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Conversations'],
     }),
 
     // --- timeline (infinite; "next page" = older entries) --------------
@@ -624,6 +688,13 @@ export const {
   useRemoveMemberMutation,
   useMyInvitesQuery,
   useRespondToInviteMutation,
+  useListConversationsQuery,
+  useThoughtConversationQuery,
+  useCreateDmMutation,
+  useConversationMessagesInfiniteQuery,
+  useSendMessageMutation,
+  useDeleteMessageMutation,
+  useMarkConversationReadMutation,
   useTimelineInfiniteQuery,
   useLazyGetEntryQuery,
   useAddEntryMutation,

@@ -68,6 +68,44 @@ export interface ThoughtMembers {
   pendingInvites: { id: string; email: string }[];
 }
 
+// --- messaging --------------------------------------------------------
+
+export type ConversationKind = 'thought' | 'dm';
+
+/** Full conversation doc, from `POST /conversations/dm` and thought conversation. */
+export interface Conversation {
+  id: string;
+  kind: ConversationKind;
+  thoughtId: string | null;
+  memberIds: string[];
+  lastMessageAt: string;
+}
+
+/** A row in the conversation list, decorated for display. */
+export interface ConversationSummary {
+  id: string;
+  kind: ConversationKind;
+  peer?: PublicUser;
+  thought?: { id: string; title: string };
+  lastMessage: { body: string; authorId: string; at: string } | null;
+  lastMessageAt: string;
+  unreadCount: number;
+}
+
+export interface Message {
+  id: string;
+  conversationId: string;
+  body: string;
+  author: PublicUser;
+  createdAt: string;
+}
+
+export interface MessagesResponse {
+  items: Message[];
+  hasMore: boolean;
+  nextCursor: string | null;
+}
+
 export type EntryKind = 'note' | 'link' | 'file';
 
 export interface EntryLink {
