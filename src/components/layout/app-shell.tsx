@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Logo } from '@/components/brand/logo';
 import { useListConversationsQuery, useMyInvitesQuery } from '@/lib/api/api';
@@ -51,29 +51,51 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
     return 0;
   };
 
+  const activeHref = NAV.find(
+    ({ href }) => pathname === href || pathname.startsWith(`${href}/`),
+  )?.href;
+
+  const navRef = useRef<HTMLElement>(null);
+  const [pill, setPill] = useState<{ top: number; height: number } | null>(null);
+
+  useEffect(() => {
+    const measure = () => {
+      const nav = navRef.current;
+      const el = nav?.querySelector<HTMLElement>(`[data-href="${activeHref}"]`);
+      setPill(el ? { top: el.offsetTop, height: el.offsetHeight } : null);
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [activeHref]);
+
   return (
-    <nav className="flex flex-col gap-0.5">
+    <nav ref={navRef} className="relative flex flex-col gap-0.5">
+      {pill ? (
+        <span
+          aria-hidden
+          className="bg-surface-2 ease-ios absolute inset-x-0 top-0 rounded-lg transition-[transform,height] duration-200 motion-reduce:transition-none"
+          style={{ transform: `translateY(${pill.top}px)`, height: pill.height }}
+        >
+          <span className="bg-accent absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-full" />
+        </span>
+      ) : null}
       {NAV.map(({ href, label, icon: Icon }) => {
-        const active = pathname === href || pathname.startsWith(`${href}/`);
+        const active = href === activeHref;
         const badge = badgeFor(href);
         return (
           <Link
             key={href}
             href={href}
+            data-href={href}
             onClick={onNavigate}
             className={cn(
-              'group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors',
+              'relative z-10 flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors',
               active
-                ? 'bg-surface-2 text-ink font-medium'
-                : 'text-ink-muted hover:bg-surface-2/70 hover:text-ink',
+                ? 'text-ink font-medium'
+                : 'text-ink-muted hover:bg-surface-2/50 hover:text-ink',
             )}
           >
-            <span
-              className={cn(
-                'bg-accent absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-full transition-opacity',
-                active ? 'opacity-100' : 'opacity-0',
-              )}
-            />
             <Icon size={16} className={active ? 'text-accent' : undefined} />
             {label}
             {badge > 0 ? (

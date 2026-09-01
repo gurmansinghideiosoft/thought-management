@@ -47,17 +47,17 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="border-hairline flex flex-col items-center justify-center gap-2.5 rounded-2xl border border-dashed px-6 py-20 text-center">
+    <div className="flex flex-col items-center justify-center gap-2 px-6 py-16 text-center">
       {icon ? (
-        <div className="bg-surface-2 text-ink-faint mb-1 grid size-12 place-items-center rounded-full">
+        <div className="bg-surface-2/60 text-ink-faint/80 mb-2 grid size-14 place-items-center rounded-2xl">
           {icon}
         </div>
       ) : null}
       <p className="text-ink font-serif text-lg font-semibold">{title}</p>
       {description ? (
-        <p className="text-ink-muted max-w-sm text-sm">{description}</p>
+        <p className="text-ink-muted max-w-xs text-sm leading-relaxed">{description}</p>
       ) : null}
-      {action ? <div className="mt-3">{action}</div> : null}
+      {action ? <div className="mt-4">{action}</div> : null}
     </div>
   );
 }

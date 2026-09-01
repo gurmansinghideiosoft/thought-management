@@ -8,7 +8,7 @@ import { PageHeader } from '@/components/layout/page-header';
 import { CreateThoughtDialog } from '@/components/thoughts/create-thought-dialog';
 import { ThoughtCard } from '@/components/thoughts/thought-card';
 import { Input } from '@/components/ui/input';
-import { EmptyState } from '@/components/ui/misc';
+import { EmptyState, Spinner } from '@/components/ui/misc';
 import { Select } from '@/components/ui/select';
 import { SkeletonCards } from '@/components/ui/skeleton';
 import { type ListThoughtsArgs, useListThoughtsQuery } from '@/lib/api/api';
@@ -75,6 +75,7 @@ export default function ThoughtsPage() {
             onValueChange={setStatus}
             options={STATUSES}
           />
+          {isFetching && !isLoading ? <Spinner className="ml-1" /> : null}
         </div>
 
         {isLoading ? (
@@ -91,10 +92,7 @@ export default function ThoughtsPage() {
             action={debouncedQ ? undefined : <CreateThoughtDialog />}
           />
         ) : (
-          <div
-            className="grid gap-3 transition-opacity sm:grid-cols-2 xl:grid-cols-3"
-            style={{ opacity: isFetching ? 0.6 : 1 }}
-          >
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {items.map((t) => (
               <ThoughtCard key={t.id} thought={t} />
             ))}

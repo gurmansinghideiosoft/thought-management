@@ -14,7 +14,7 @@ export function JournalEntryRow({ entry }: { entry: JournalEntry }) {
   return (
     <Link
       href={`/journal/${entry.id}`}
-      className="group border-hairline bg-surface hover:border-ink-faint/40 flex items-stretch gap-4 rounded-xl border p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(26,23,18,0.08)]"
+      className="group border-hairline bg-surface shadow-raised hover:border-ink-faint/40 hover:shadow-popover ease-ios active:shadow-raised flex items-stretch gap-4 rounded-xl border p-4 transition-[transform,box-shadow,border-color] duration-150 hover:-translate-y-0.5 active:translate-y-0 active:duration-75"
     >
       <div className="bg-surface-2/70 border-hairline flex w-14 shrink-0 flex-col items-center justify-center rounded-lg border py-1.5">
         <span className="text-ink font-serif text-xl leading-none font-semibold tabular-nums">

@@ -64,7 +64,7 @@ export function JournalCalendar() {
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-1">
+      <div key={month} className="animate-fade-in grid grid-cols-7 gap-1">
         {days.map((day) => {
           const has = written.has(day.key);
           const future = day.key > today;

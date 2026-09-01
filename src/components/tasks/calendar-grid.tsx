@@ -42,23 +42,31 @@ export function CalendarGrid({
         ))}
       </div>
 
-      <div className="border-hairline bg-surface grid flex-1 grid-cols-7 grid-rows-6 overflow-hidden rounded-xl border">
+      <div
+        key={month}
+        className="border-hairline bg-surface animate-fade-in grid flex-1 grid-cols-7 grid-rows-6 overflow-hidden rounded-xl border"
+      >
         {days.map((day, i) => {
           const c = counts[day.key] ?? { pending: 0, done: 0 };
           const lastCol = (i + 1) % 7 === 0;
           const lastRow = i >= 35;
           return (
-            <button
+            <div
               key={day.key}
-              onClick={() => onPickDay(day.key)}
               className={cn(
-                'group hover:bg-surface-2/60 relative flex min-h-0 flex-col p-1.5 text-left transition-colors',
+                'group relative flex min-h-0 flex-col p-1.5',
                 !lastCol && 'border-hairline border-r',
                 !lastRow && 'border-hairline border-b',
-                !day.inMonth && 'bg-surface-2/40 text-ink-faint',
+                !day.inMonth && 'bg-surface-2/40',
               )}
             >
-              <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => onPickDay(day.key)}
+                aria-label={`Open ${day.key}`}
+                className="hover:bg-surface-2/60 absolute inset-0 transition-colors"
+              />
+              <div className="pointer-events-none relative flex items-center justify-between">
                 <span
                   className={cn(
                     'flex size-6 items-center justify-center rounded-full text-[12.5px] tabular-nums',
@@ -71,21 +79,18 @@ export function CalendarGrid({
                 >
                   {day.date.getDate()}
                 </span>
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onQuickAdd(day.key);
-                  }}
-                  role="button"
+                <button
+                  type="button"
                   tabIndex={-1}
-                  className="text-ink-faint hover:bg-surface hover:text-ink rounded-md p-0.5 opacity-0 transition-opacity group-hover:opacity-100 pointer-coarse:opacity-100"
+                  onClick={() => onQuickAdd(day.key)}
                   aria-label="Add task"
+                  className="text-ink-faint hover:bg-surface hover:text-ink pointer-events-auto relative rounded-md p-0.5 opacity-0 transition-opacity group-hover:opacity-100 pointer-coarse:opacity-100"
                 >
                   <Plus size={13} />
-                </span>
+                </button>
               </div>
 
-              <div className="mt-auto flex flex-wrap gap-1">
+              <div className="pointer-events-none relative mt-auto flex flex-wrap gap-1">
                 {c.pending > 0 ? (
                   <span className="bg-accent/12 text-accent inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] leading-none font-medium">
                     <span className="bg-accent size-1.5 rounded-full" />
@@ -98,7 +103,7 @@ export function CalendarGrid({
                   </span>
                 ) : null}
               </div>
-            </button>
+            </div>
           );
         })}
       </div>

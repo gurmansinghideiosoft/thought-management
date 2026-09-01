@@ -13,7 +13,7 @@ export function ThoughtCard({ thought }: { thought: Thought }) {
   return (
     <Link
       href={`/thoughts/${thought.id}`}
-      className="group border-hairline bg-surface hover:border-ink-faint/40 flex h-full flex-col rounded-xl border p-4 shadow-[0_1px_2px_rgba(26,23,18,0.04)] transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(26,23,18,0.08)]"
+      className="group border-hairline bg-surface shadow-raised hover:border-ink-faint/40 hover:shadow-popover ease-ios active:shadow-raised flex h-full flex-col rounded-xl border p-4 transition-[transform,box-shadow,border-color] duration-150 hover:-translate-y-0.5 active:translate-y-0 active:duration-75"
     >
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-ink font-serif text-[15px] leading-snug font-semibold">
