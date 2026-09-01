@@ -4,8 +4,17 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  /** `null` only for accounts created before usernames existed. */
+  username: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+/** The only fields other users can see about someone. */
+export interface PublicUser {
+  id: string;
+  username: string | null;
+  name: string;
 }
 
 export interface AuthResponse {

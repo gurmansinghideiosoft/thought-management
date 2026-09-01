@@ -28,7 +28,7 @@ const NAV = [
 ] as const;
 
 function initials(user: User): string {
-  const base = user.name.trim() || user.email;
+  const base = user.name.trim() || user.username || user.email;
   return base.slice(0, 1).toUpperCase();
 }
 
@@ -72,8 +72,13 @@ function AccountFooter({ user, onSignOut }: { user: User; onSignOut: () => void 
         <span className="bg-accent/12 text-accent grid size-7 shrink-0 place-items-center rounded-full text-[12px] font-semibold">
           {initials(user)}
         </span>
-        <span className="text-ink min-w-0 flex-1 truncate text-sm">
-          {user.name || user.email}
+        <span className="min-w-0 flex-1 truncate text-sm">
+          <span className="text-ink block truncate">{user.name || user.email}</span>
+          {user.username ? (
+            <span className="text-ink-faint block truncate text-[12px]">
+              @{user.username}
+            </span>
+          ) : null}
         </span>
         <button
           onClick={onSignOut}

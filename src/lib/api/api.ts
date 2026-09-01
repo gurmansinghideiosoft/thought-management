@@ -74,12 +74,16 @@ export const api = createApi({
     }),
     register: build.mutation<
       AuthResponse,
-      { email: string; password: string; name?: string }
+      { email: string; password: string; username: string; name?: string }
     >({
       query: (data) => ({ url: '/auth/register', method: 'POST', data }),
     }),
     logout: build.mutation<void, { refreshToken: string | null }>({
       query: (data) => ({ url: '/auth/logout', method: 'POST', data }),
+    }),
+    updateMe: build.mutation<{ user: User }, { username?: string; name?: string }>({
+      query: (data) => ({ url: '/auth/me', method: 'PATCH', data }),
+      invalidatesTags: ['Me'],
     }),
 
     // --- thoughts ------------------------------------------------------
@@ -546,6 +550,7 @@ export const {
   useLoginMutation,
   useRegisterMutation,
   useLogoutMutation,
+  useUpdateMeMutation,
   useListThoughtsQuery,
   useListTrashQuery,
   useGetThoughtQuery,
