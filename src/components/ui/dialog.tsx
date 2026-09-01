@@ -23,13 +23,13 @@ export function DialogContent({
   return (
     <RadixDialog.Portal>
       <RadixDialog.Overlay
-        className="fixed inset-0 z-40"
+        className="animate-overlay-in data-[state=closed]:animate-overlay-out fixed inset-0 z-40 backdrop-blur-[2px]"
         style={{ backgroundColor: 'var(--backdrop)' }}
       />
       <RadixDialog.Content
         className={cn(
-          'fixed top-1/2 left-1/2 z-50 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2',
-          'border-hairline bg-overlay rounded-2xl border p-5 shadow-2xl shadow-black/20 focus:outline-none',
+          'animate-dialog-in data-[state=closed]:animate-dialog-out fixed top-1/2 left-1/2 z-50 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2',
+          'border-hairline bg-overlay shadow-modal rounded-2xl border p-5 focus:outline-none',
           className,
         )}
       >

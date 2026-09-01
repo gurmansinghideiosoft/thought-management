@@ -19,7 +19,7 @@ export function DropdownContent({
       <RadixMenu.Content
         align={align}
         sideOffset={6}
-        className="border-hairline bg-overlay z-50 min-w-48 rounded-xl border p-1 shadow-xl shadow-black/15 focus:outline-none"
+        className="border-hairline bg-overlay shadow-popover animate-pop-in data-[state=closed]:animate-pop-out z-50 min-w-48 origin-[var(--radix-dropdown-menu-content-transform-origin)] rounded-xl border p-1 focus:outline-none"
       >
         {children}
       </RadixMenu.Content>

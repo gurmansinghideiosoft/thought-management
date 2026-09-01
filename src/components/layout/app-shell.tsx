@@ -154,10 +154,10 @@ export function AppShell({
             </Dialog.Trigger>
             <Dialog.Portal>
               <Dialog.Overlay
-                className="fixed inset-0 z-40"
+                className="animate-overlay-in data-[state=closed]:animate-overlay-out fixed inset-0 z-40 backdrop-blur-[2px]"
                 style={{ backgroundColor: 'var(--backdrop)' }}
               />
-              <Dialog.Content className="border-hairline bg-surface fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r px-3 py-4 shadow-2xl focus:outline-none">
+              <Dialog.Content className="border-hairline bg-surface shadow-modal animate-drawer-in data-[state=closed]:animate-drawer-out fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r px-3 py-4 focus:outline-none">
                 <div className="mb-5 flex items-center justify-between px-2.5">
                   <Logo />
                   <Dialog.Close

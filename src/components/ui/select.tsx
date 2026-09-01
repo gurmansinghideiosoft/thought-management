@@ -32,8 +32,8 @@ export function Select<T extends string>({
       <Popover.Trigger
         aria-label={ariaLabel}
         className={cn(
-          'border-hairline bg-field text-ink inline-flex h-10 items-center justify-between gap-2 rounded-lg border px-3 text-sm transition-colors',
-          'hover:bg-surface-2 focus-visible:ring-accent/25 focus:outline-none focus-visible:ring-2',
+          'border-hairline bg-field text-ink focus-ring inline-flex h-10 items-center justify-between gap-2 rounded-lg border px-3 text-sm transition-colors',
+          'hover:bg-surface-2',
           className,
         )}
       >
@@ -44,7 +44,7 @@ export function Select<T extends string>({
         <Popover.Content
           align="start"
           sideOffset={6}
-          className="border-hairline bg-overlay z-50 max-h-72 min-w-[--radix-popover-trigger-width] overflow-y-auto rounded-xl border p-1 shadow-xl shadow-black/15 focus:outline-none"
+          className="border-hairline bg-overlay shadow-popover animate-pop-in data-[state=closed]:animate-pop-out z-50 max-h-72 min-w-(--radix-popover-trigger-width) origin-[var(--radix-popover-content-transform-origin)] overflow-y-auto rounded-xl border p-1 focus:outline-none"
         >
           {options.map((o) => (
             <button
