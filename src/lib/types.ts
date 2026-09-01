@@ -276,3 +276,9 @@ export interface JournalListResponse {
   hasMore: boolean;
   nextCursor: string | null;
 }
+
+export interface JournalStreak {
+  current: number;
+  longest: number;
+  writtenToday: boolean;
+}

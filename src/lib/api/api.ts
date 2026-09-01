@@ -10,6 +10,7 @@ import type {
   JournalContent,
   JournalEntry,
   JournalListResponse,
+  JournalStreak,
   Message,
   MessagesResponse,
   RangeMode,
@@ -650,6 +651,17 @@ export const api = createApi({
       }),
       providesTags: ['Journal'],
     }),
+    journalStreak: build.query<JournalStreak, void>({
+      query: () => ({
+        url: '/journal/streak',
+        params: { today: toDateKey(new Date()) },
+      }),
+      providesTags: ['Journal'],
+    }),
+    journalCalendar: build.query<{ month: string; dates: string[] }, string>({
+      query: (month) => ({ url: '/journal/calendar', params: { month } }),
+      providesTags: ['Journal'],
+    }),
     getJournalEntry: build.query<JournalEntry, string>({
       query: (id) => ({ url: `/journal/${id}` }),
       providesTags: (_r, _e, id) => [{ type: 'Journal', id }],
@@ -749,6 +761,8 @@ export const {
   useUpdateTaskTagMutation,
   useDeleteTaskTagMutation,
   useListJournalInfiniteQuery,
+  useJournalStreakQuery,
+  useJournalCalendarQuery,
   useGetJournalEntryQuery,
   useUpsertJournalByDateMutation,
   useUpdateJournalEntryMutation,
