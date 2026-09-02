@@ -5,12 +5,14 @@ import {
   Activity,
   CalendarDays,
   Home,
+  Inbox,
   KeyRound,
   Lightbulb,
   LogOut,
   MessagesSquare,
   Menu as MenuIcon,
   NotebookPen,
+  Plus,
   Trash2,
   Wallet,
   X,
@@ -20,13 +22,19 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 import { Logo } from '@/components/brand/logo';
-import { useListConversationsQuery, useMyInvitesQuery } from '@/lib/api/api';
+import { QuickCaptureDialog } from '@/components/capture/quick-capture';
+import {
+  useListCapturesQuery,
+  useListConversationsQuery,
+  useMyInvitesQuery,
+} from '@/lib/api/api';
 import { cn } from '@/lib/cn';
 import type { User } from '@/lib/types';
 import { ThemeToggle } from './theme-toggle';
 
 const NAV = [
   { href: '/home', label: 'Home', icon: Home },
+  { href: '/inbox', label: 'Inbox', icon: Inbox },
   { href: '/thoughts', label: 'Thoughts', icon: Lightbulb },
   { href: '/tasks', label: 'Tasks', icon: CalendarDays },
   { href: '/messages', label: 'Messages', icon: MessagesSquare },
@@ -46,10 +54,12 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const { data: convs } = useListConversationsQuery();
   const { data: invites } = useMyInvitesQuery();
+  const { data: captures } = useListCapturesQuery('open');
   const unreadMessages = convs?.items.reduce((sum, c) => sum + c.unreadCount, 0) ?? 0;
   const badgeFor = (href: string): number => {
     if (href === '/messages') return unreadMessages;
     if (href === '/thoughts') return invites?.length ?? 0;
+    if (href === '/inbox') return captures?.length ?? 0;
     return 0;
   };
 
@@ -144,6 +154,22 @@ function AccountFooter({ user, onSignOut }: { user: User; onSignOut: () => void 
   );
 }
 
+function CaptureButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="border-hairline text-ink-muted hover:border-ink-faint/40 hover:text-ink mb-2 flex w-full items-center gap-2 rounded-lg border border-dashed px-2.5 py-2 text-sm transition-colors"
+    >
+      <Plus size={15} />
+      Quick capture
+      <kbd className="border-hairline text-ink-faint ml-auto rounded border px-1 font-sans text-[10px]">
+        C
+      </kbd>
+    </button>
+  );
+}
+
 export function AppShell({
   user,
   onSignOut,
@@ -154,16 +180,35 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [captureOpen, setCaptureOpen] = useState(false);
+
+  // Press `c` from anywhere (not while typing) to capture a thought.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key.toLowerCase() !== 'c') return;
+      const el = e.target as HTMLElement | null;
+      if (el?.isContentEditable || (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)))
+        return;
+      e.preventDefault();
+      setCaptureOpen(true);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   return (
     // Cap the shell at the viewport and let only <main> scroll, so the sidebar
     // and mobile bar never move with the page.
     <div className="flex min-h-0 flex-1 overflow-hidden">
+      <QuickCaptureDialog open={captureOpen} onOpenChange={setCaptureOpen} />
+
       {/* desktop sidebar */}
       <aside className="border-hairline bg-surface/60 hidden w-60 shrink-0 flex-col overflow-y-auto border-r px-3 py-4 backdrop-blur-sm md:flex">
-        <Link href="/home" className="px-2.5 pb-5">
+        <Link href="/home" className="px-2.5 pb-4">
           <Logo />
         </Link>
+        <CaptureButton onClick={() => setCaptureOpen(true)} />
         <NavLinks />
         <AccountFooter user={user} onSignOut={onSignOut} />
       </aside>
@@ -193,6 +238,12 @@ export function AppShell({
                     <X size={16} />
                   </Dialog.Close>
                 </div>
+                <CaptureButton
+                  onClick={() => {
+                    setDrawerOpen(false);
+                    setCaptureOpen(true);
+                  }}
+                />
                 <NavLinks onNavigate={() => setDrawerOpen(false)} />
                 <AccountFooter user={user} onSignOut={onSignOut} />
               </Dialog.Content>

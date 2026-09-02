@@ -6,6 +6,8 @@ import type {
   AuthResponse,
   Conversation,
   ConversationSummary,
+  Capture,
+  CaptureStatus,
   CredentialCipher,
   CredentialMeta,
   Entry,
@@ -85,6 +87,7 @@ export const api = createApi({
     'Credential',
     'Finance',
     'FinanceTag',
+    'Capture',
   ],
   endpoints: (build) => ({
     // --- auth ------------------------------------------------------------
@@ -717,6 +720,28 @@ export const api = createApi({
       invalidatesTags: ['Journal'],
     }),
 
+    // --- inbox / quick capture ------------------------------------
+    listCaptures: build.query<Capture[], CaptureStatus | void>({
+      query: (status) => ({ url: '/captures', params: { status: status ?? 'open' } }),
+      transformResponse: (r: { items: Capture[] }) => r.items,
+      providesTags: ['Capture'],
+    }),
+    createCapture: build.mutation<Capture, { text: string }>({
+      query: (data) => ({ url: '/captures', method: 'POST', data }),
+      invalidatesTags: ['Capture'],
+    }),
+    updateCapture: build.mutation<
+      Capture,
+      { id: string; text?: string; status?: CaptureStatus }
+    >({
+      query: ({ id, ...data }) => ({ url: `/captures/${id}`, method: 'PATCH', data }),
+      invalidatesTags: ['Capture'],
+    }),
+    deleteCapture: build.mutation<void, string>({
+      query: (id) => ({ url: `/captures/${id}`, method: 'DELETE' }),
+      invalidatesTags: ['Capture'],
+    }),
+
     // --- finance ----------------------------------------------------
     listFinanceTags: build.query<FinanceTag[], void>({
       query: () => ({ url: '/finance/tags' }),
@@ -908,6 +933,10 @@ export const {
   useUpsertJournalByDateMutation,
   useUpdateJournalEntryMutation,
   useDeleteJournalEntryMutation,
+  useListCapturesQuery,
+  useCreateCaptureMutation,
+  useUpdateCaptureMutation,
+  useDeleteCaptureMutation,
   useListFinanceTagsQuery,
   useCreateFinanceTagMutation,
   useUpdateFinanceTagMutation,

@@ -333,6 +333,18 @@ export interface CredentialPayload {
   notes: string;
 }
 
+// --- inbox / quick capture -------------------------------------------
+
+export type CaptureStatus = 'open' | 'archived';
+
+export interface Capture {
+  id: string;
+  text: string;
+  status: CaptureStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // --- finance -----------------------------------------------------------
 
 export interface FinanceTag {
