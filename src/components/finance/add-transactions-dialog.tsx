@@ -45,7 +45,7 @@ export function AddTransactionsDialog({ trigger }: { trigger: React.ReactNode })
       }}
     >
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent title="Add transactions" className="max-w-xl">
+      <DialogContent title="Add transactions" className="max-w-3xl">
         <Body key={session} onSaved={() => setOpen(false)} />
       </DialogContent>
     </Dialog>
@@ -98,40 +98,40 @@ function Body({ onSaved }: { onSaved: () => void }) {
         />
       </label>
 
-      <div className="-mr-1 flex max-h-[55vh] flex-col gap-2 overflow-y-auto pr-1">
+      <div className="-mr-1 flex max-h-[60vh] flex-col gap-2 overflow-y-auto pr-1">
         {rows.map((r) => (
           <div
             key={r.id}
-            className="border-hairline bg-surface flex flex-wrap items-center gap-2 rounded-lg border p-2"
+            className="border-hairline bg-surface flex flex-wrap items-center gap-2.5 rounded-lg border p-2.5"
           >
             <Input
               value={r.title}
               onChange={(e) => patch(r.id, { title: e.target.value })}
               placeholder="What was it?"
               maxLength={120}
-              className="h-9 min-w-[8rem] flex-1"
+              className="h-9 min-w-[12rem] flex-1"
             />
             <Input
               value={r.amount}
               onChange={(e) => patch(r.id, { amount: e.target.value })}
               inputMode="decimal"
               placeholder="0.00"
-              className="h-9 w-24 tabular-nums"
+              className="h-9 w-28 tabular-nums"
             />
             <KindToggle
               value={r.kind}
               onChange={(kind) => patch(r.id, { kind })}
-              className="w-28"
+              className="w-36 shrink-0"
             />
             <TagCombobox
               value={r.tagId}
               onChange={(tagId) => patch(r.id, { tagId })}
               tags={tags ?? []}
-              className="w-36"
+              className="w-44 shrink-0"
             />
             <IconButton
               label="Remove row"
-              className="size-8"
+              className="size-8 shrink-0"
               disabled={rows.length === 1}
               onClick={() => setRows((rs) => rs.filter((x) => x.id !== r.id))}
             >
