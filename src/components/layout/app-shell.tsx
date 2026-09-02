@@ -35,6 +35,7 @@ import {
 } from '@/lib/api/api';
 import { cn } from '@/lib/cn';
 import type { User } from '@/lib/types';
+import { initials } from '@/lib/user';
 import { ThemeToggle } from './theme-toggle';
 
 const NAV = [
@@ -52,11 +53,6 @@ const NAV = [
   { href: '/settings', label: 'Settings', icon: Settings },
   { href: '/trash', label: 'Trash', icon: Trash2 },
 ] as const;
-
-function initials(user: User): string {
-  const base = user.name.trim() || user.username || user.email;
-  return base.slice(0, 1).toUpperCase();
-}
 
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();

@@ -137,6 +137,13 @@ export const api = createApi({
       query: (data) => ({ url: '/auth/me', method: 'PATCH', data }),
       invalidatesTags: ['Me'],
     }),
+    changePassword: build.mutation<
+      AuthResponse,
+      { currentPassword: string; newPassword: string }
+    >({
+      query: (data) => ({ url: '/auth/change-password', method: 'POST', data }),
+      invalidatesTags: ['Me'],
+    }),
 
     // --- thoughts ------------------------------------------------------
     listThoughts: build.query<ThoughtListResponse, ListThoughtsArgs | void>({
@@ -1024,6 +1031,7 @@ export const {
   useCheckUsernameQuery,
   useLogoutMutation,
   useUpdateMeMutation,
+  useChangePasswordMutation,
   useListThoughtsQuery,
   useListTrashQuery,
   useGetThoughtQuery,
