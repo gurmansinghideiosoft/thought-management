@@ -50,12 +50,52 @@ export function CredentialDialog({
   initialPayload?: CredentialPayload;
   trigger: React.ReactNode;
 }) {
+  const [open, setOpen] = useState(false);
+  // Bumped on every open so the form remounts with fresh state — otherwise a
+  // "New credential" dialog reopens still holding the last entry.
+  const [session, setSession] = useState(0);
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (o) setSession((s) => s + 1);
+      }}
+    >
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent
+        title={mode === 'create' ? 'New credential' : 'Edit credential'}
+        className="max-w-lg"
+      >
+        <CredentialForm
+          key={session}
+          mode={mode}
+          credential={credential}
+          initialPayload={initialPayload}
+          onSaved={() => setOpen(false)}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function CredentialForm({
+  mode,
+  credential,
+  initialPayload,
+  onSaved,
+}: {
+  mode: 'create' | 'edit';
+  credential?: CredentialMeta;
+  initialPayload?: CredentialPayload;
+  onSaved: () => void;
+}) {
   const toast = useToast();
   const { seal } = useVault();
   const [create, { isLoading: creating }] = useCreateCredentialMutation();
   const [update, { isLoading: updating }] = useUpdateCredentialMutation();
 
-  const [open, setOpen] = useState(false);
   const [name, setName] = useState(credential?.name ?? '');
   const [category, setCategory] = useState<CredentialCategory>(
     credential?.category ?? 'login',
@@ -109,131 +149,118 @@ export function CredentialDialog({
         }).unwrap();
         toast.success('Updated');
       }
-      setOpen(false);
+      onSaved();
     } catch (err) {
       toast.error(errorMessage(err, 'Could not save'));
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent
-        title={mode === 'create' ? 'New credential' : 'Edit credential'}
-        className="max-w-lg"
-      >
-        <div className="flex max-h-[70vh] flex-col gap-4 overflow-y-auto pr-1">
-          <Field label="Name">
-            {({ id }) => (
-              <Input
-                id={id}
-                autoFocus
-                placeholder="GitHub, AWS, Stripe…"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                maxLength={120}
-              />
-            )}
-          </Field>
+    <div className="flex max-h-[70vh] flex-col gap-4 overflow-y-auto pr-1">
+      <Field label="Name">
+        {({ id }) => (
+          <Input
+            id={id}
+            autoFocus
+            placeholder="GitHub, AWS, Stripe…"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            maxLength={120}
+          />
+        )}
+      </Field>
 
-          <div className="flex flex-col gap-1.5">
-            <span className="text-ink-muted text-[13px] font-medium">Category</span>
-            <div className="border-hairline bg-surface flex rounded-lg border p-0.5">
-              {CATEGORIES.map((c) => (
-                <button
-                  key={c.value}
-                  type="button"
-                  onClick={() => pickCategory(c.value)}
-                  className={cn(
-                    'h-8 flex-1 rounded-md text-[12px] transition-colors',
-                    category === c.value
-                      ? 'bg-surface-2 text-ink font-medium'
-                      : 'text-ink-muted hover:text-ink',
-                  )}
-                >
-                  {c.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <span className="text-ink-muted text-[13px] font-medium">Fields</span>
-            {fields.map((f, i) => (
-              <FieldRow
-                key={i}
-                field={f}
-                onChange={(patch) => setField(i, patch)}
-                onRemove={() => setFields((rows) => rows.filter((_, idx) => idx !== i))}
-              />
-            ))}
+      <div className="flex flex-col gap-1.5">
+        <span className="text-ink-muted text-[13px] font-medium">Category</span>
+        <div className="border-hairline bg-surface flex rounded-lg border p-0.5">
+          {CATEGORIES.map((c) => (
             <button
+              key={c.value}
               type="button"
-              onClick={() =>
-                setFields((f) => [...f, { label: '', value: '', secret: true }])
-              }
-              className="border-hairline text-ink-muted hover:text-ink inline-flex items-center gap-1.5 self-start rounded-lg border border-dashed px-2.5 py-1.5 text-[12px]"
+              onClick={() => pickCategory(c.value)}
+              className={cn(
+                'h-8 flex-1 rounded-md text-[12px] transition-colors',
+                category === c.value
+                  ? 'bg-surface-2 text-ink font-medium'
+                  : 'text-ink-muted hover:text-ink',
+              )}
             >
-              <Plus size={13} /> Add field
+              {c.label}
             </button>
-          </div>
-
-          <Field label="Notes">
-            {({ id }) => (
-              <Textarea
-                id={id}
-                rows={2}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Recovery codes, security questions, anything else."
-              />
-            )}
-          </Field>
-
-          <div className="flex flex-col gap-1.5">
-            <span className="text-ink-muted text-[13px] font-medium">Tags</span>
-            <div className="flex flex-wrap items-center gap-1.5">
-              {tags.map((t) => (
-                <span
-                  key={t}
-                  className="border-hairline text-ink-muted inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px]"
-                >
-                  {t}
-                  <button
-                    type="button"
-                    onClick={() => setTags(tags.filter((x) => x !== t))}
-                  >
-                    <X size={11} />
-                  </button>
-                </span>
-              ))}
-              <input
-                value={tagDraft}
-                onChange={(e) => setTagDraft(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ',') {
-                    e.preventDefault();
-                    addTag();
-                  }
-                }}
-                onBlur={addTag}
-                placeholder="add a tag"
-                className="text-ink placeholder:text-ink-faint min-w-[6rem] flex-1 bg-transparent text-[12px] focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <Button
-            className="mt-1"
-            onClick={save}
-            loading={creating || updating}
-            disabled={!name.trim()}
-          >
-            {mode === 'create' ? 'Save credential' : 'Save changes'}
-          </Button>
+          ))}
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <span className="text-ink-muted text-[13px] font-medium">Fields</span>
+        {fields.map((f, i) => (
+          <FieldRow
+            key={i}
+            field={f}
+            onChange={(patch) => setField(i, patch)}
+            onRemove={() => setFields((rows) => rows.filter((_, idx) => idx !== i))}
+          />
+        ))}
+        <button
+          type="button"
+          onClick={() => setFields((f) => [...f, { label: '', value: '', secret: true }])}
+          className="border-hairline text-ink-muted hover:text-ink inline-flex items-center gap-1.5 self-start rounded-lg border border-dashed px-2.5 py-1.5 text-[12px]"
+        >
+          <Plus size={13} /> Add field
+        </button>
+      </div>
+
+      <Field label="Notes">
+        {({ id }) => (
+          <Textarea
+            id={id}
+            rows={2}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Recovery codes, security questions, anything else."
+          />
+        )}
+      </Field>
+
+      <div className="flex flex-col gap-1.5">
+        <span className="text-ink-muted text-[13px] font-medium">Tags</span>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {tags.map((t) => (
+            <span
+              key={t}
+              className="border-hairline text-ink-muted inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px]"
+            >
+              {t}
+              <button type="button" onClick={() => setTags(tags.filter((x) => x !== t))}>
+                <X size={11} />
+              </button>
+            </span>
+          ))}
+          <input
+            value={tagDraft}
+            onChange={(e) => setTagDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                addTag();
+              }
+            }}
+            onBlur={addTag}
+            placeholder="add a tag"
+            className="text-ink placeholder:text-ink-faint min-w-[6rem] flex-1 bg-transparent text-[12px] focus:outline-none"
+          />
+        </div>
+      </div>
+
+      <Button
+        className="mt-1"
+        onClick={save}
+        loading={creating || updating}
+        disabled={!name.trim()}
+      >
+        {mode === 'create' ? 'Save credential' : 'Save changes'}
+      </Button>
+    </div>
   );
 }
 
