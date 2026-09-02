@@ -333,6 +333,39 @@ export interface CredentialPayload {
   notes: string;
 }
 
+// --- habits ----------------------------------------------------------
+
+export type HabitType = 'binary' | 'count';
+
+export interface Habit {
+  id: string;
+  name: string;
+  type: HabitType;
+  /** Daily goal for `count` habits; `1` for `binary`. */
+  target: number;
+  unit: string;
+  color: string;
+  archived: boolean;
+  position: number;
+  /** Today's logged value (0 = nothing). */
+  todayValue: number;
+  doneToday: boolean;
+  currentStreak: number;
+  longestStreak: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface HabitDay {
+  date: string;
+  value: number;
+}
+
+export interface HabitMonth {
+  month: string;
+  days: HabitDay[];
+}
+
 // --- inbox / quick capture -------------------------------------------
 
 export type CaptureStatus = 'open' | 'archived';

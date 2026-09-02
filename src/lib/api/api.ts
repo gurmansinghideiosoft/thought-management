@@ -13,6 +13,8 @@ import type {
   Entry,
   FinanceSummary,
   FinanceTag,
+  Habit,
+  HabitMonth,
   JournalContent,
   JournalEntry,
   JournalListResponse,
@@ -90,6 +92,8 @@ export const api = createApi({
     'FinanceTag',
     'Recurring',
     'Capture',
+    'Habit',
+    'HabitMonth',
   ],
   endpoints: (build) => ({
     // --- auth ------------------------------------------------------------
@@ -722,6 +726,63 @@ export const api = createApi({
       invalidatesTags: ['Journal'],
     }),
 
+    // --- habits ---------------------------------------------------
+    listHabits: build.query<Habit[], { date?: string; includeArchived?: boolean } | void>(
+      {
+        query: (args) => ({ url: '/habits', params: clean({ ...(args ?? {}) }) }),
+        transformResponse: (r: { items: Habit[] }) => r.items,
+        providesTags: ['Habit'],
+      },
+    ),
+    createHabit: build.mutation<
+      Habit,
+      { name: string; type?: string; target?: number; unit?: string; color?: string }
+    >({
+      query: (data) => ({ url: '/habits', method: 'POST', data }),
+      invalidatesTags: ['Habit'],
+    }),
+    updateHabit: build.mutation<
+      Habit,
+      {
+        id: string;
+        name?: string;
+        type?: string;
+        target?: number;
+        unit?: string;
+        color?: string;
+        archived?: boolean;
+      }
+    >({
+      query: ({ id, ...data }) => ({ url: `/habits/${id}`, method: 'PATCH', data }),
+      invalidatesTags: ['Habit', 'HabitMonth'],
+    }),
+    deleteHabit: build.mutation<void, string>({
+      query: (id) => ({ url: `/habits/${id}`, method: 'DELETE' }),
+      invalidatesTags: ['Habit', 'HabitMonth'],
+    }),
+    reorderHabits: build.mutation<void, string[]>({
+      query: (ids) => ({ url: '/habits/reorder', method: 'PUT', data: { ids } }),
+      invalidatesTags: ['Habit'],
+    }),
+    setHabitEntry: build.mutation<
+      { entry: { date: string; value: number } | null },
+      { habitId: string; date: string; value: number }
+    >({
+      query: ({ habitId, date, value }) => ({
+        url: `/habits/${habitId}/entries/${date}`,
+        method: 'PUT',
+        data: { value },
+      }),
+      invalidatesTags: ['Habit', 'HabitMonth'],
+    }),
+    habitMonth: build.query<HabitMonth, { habitId: string; month: string }>({
+      query: ({ habitId, month }) => ({
+        url: `/habits/${habitId}/month`,
+        params: { month },
+      }),
+      providesTags: (_r, _e, { habitId }) => [{ type: 'HabitMonth', id: habitId }],
+    }),
+
     // --- inbox / quick capture ------------------------------------
     listCaptures: build.query<Capture[], CaptureStatus | void>({
       query: (status) => ({ url: '/captures', params: { status: status ?? 'open' } }),
@@ -997,6 +1058,13 @@ export const {
   useCreateRecurringMutation,
   useUpdateRecurringMutation,
   useDeleteRecurringMutation,
+  useListHabitsQuery,
+  useCreateHabitMutation,
+  useUpdateHabitMutation,
+  useDeleteHabitMutation,
+  useReorderHabitsMutation,
+  useSetHabitEntryMutation,
+  useHabitMonthQuery,
   useVaultKeystoreQuery,
   useSetupVaultMutation,
   useRekeyVaultMutation,

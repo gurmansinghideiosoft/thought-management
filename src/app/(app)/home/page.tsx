@@ -1,6 +1,7 @@
 'use client';
 
 import { DailyQuote } from '@/components/home/daily-quote';
+import { HabitsToday } from '@/components/home/habits-today';
 import { HeroBanner } from '@/components/home/hero-banner';
 import { RecentThoughts } from '@/components/home/recent-thoughts';
 import { TodayTasks } from '@/components/home/today-tasks';
@@ -37,6 +38,7 @@ export default function HomePage() {
         <DailyQuote />
         <div className="grid gap-4 lg:grid-cols-2">
           <TodayTasks />
+          <HabitsToday />
           <RecentThoughts />
         </div>
       </div>
