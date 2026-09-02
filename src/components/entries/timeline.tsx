@@ -11,10 +11,13 @@ export function Timeline({
   args,
   tags,
   readOnly = false,
+  header,
 }: {
   args: TimelineArgs;
   tags: Tag[];
   readOnly?: boolean;
+  /** Pinned card shown above the entries (the thought overview). */
+  header?: React.ReactNode;
 }) {
   const { data, isLoading, isFetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useTimelineInfiniteQuery(args);
@@ -73,9 +76,13 @@ export function Timeline({
 
   if (isLoading) return <CenteredSpinner />;
 
+  const filtered = Boolean(args.tagId || args.starred || args.kind || args.q);
+
   return (
     <div ref={scrollRef} className="flex-1 overflow-y-auto">
       <div className="reading-column px-4 py-6">
+        {header && !filtered ? <div className="mb-4">{header}</div> : null}
+
         {hasNextPage ? (
           <div ref={topSentinel} className="flex justify-center py-2">
             {isFetchingNextPage ? <Spinner /> : null}

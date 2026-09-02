@@ -95,30 +95,28 @@ export function EntryItem({
   };
 
   return (
-    <div className="group border-hairline bg-surface relative rounded-xl border px-4 py-3">
-      <div className="text-ink-faint mb-1 flex items-center gap-2 text-[12px]">
-        <span>{clockTime(entry.createdAt)}</span>
-        {entry.kind !== 'note' ? (
-          <span className="inline-flex items-center gap-1 capitalize">
-            · {entry.kind === 'link' ? <Link2 size={12} /> : null}
-            {entry.kind}
-          </span>
-        ) : null}
-
+    <div
+      className={cn(
+        'group border-hairline bg-surface relative rounded-xl border p-4',
+        !entry.body && entry.kind !== 'note' && 'pt-9',
+      )}
+    >
+      <div className="absolute top-2 right-2.5 flex items-center gap-1">
         {readOnly ? null : (
-          <div className="ml-auto flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 data-[open=true]:opacity-100 pointer-coarse:opacity-100">
+          <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 pointer-coarse:opacity-100">
             <IconButton
               label={entry.starred ? 'Unstar' : 'Star'}
+              className="size-7"
               onClick={() =>
                 setStarred({ thoughtId, entryId: entry.id, starred: !entry.starred })
               }
             >
-              <Star size={15} className={cn(entry.starred && 'fill-star text-star')} />
+              <Star size={14} className={cn(entry.starred && 'fill-star text-star')} />
             </IconButton>
             <Dropdown>
               <DropdownTrigger asChild>
-                <IconButton label="More">
-                  <MoreHorizontal size={15} />
+                <IconButton label="More" className="size-7">
+                  <MoreHorizontal size={14} />
                 </IconButton>
               </DropdownTrigger>
               <DropdownContent>
@@ -138,12 +136,12 @@ export function EntryItem({
             </Dropdown>
           </div>
         )}
-        {entry.starred ? (
-          <Star
-            size={13}
-            className="fill-star text-star opacity-100 transition-opacity group-hover:opacity-0"
-          />
-        ) : null}
+        <span className="text-ink-faint flex items-center gap-1 text-[11px] tabular-nums group-hover:hidden">
+          {entry.starred ? (
+            <Star size={11} className="fill-star text-star pointer-coarse:hidden" />
+          ) : null}
+          {clockTime(entry.createdAt)}
+        </span>
       </div>
 
       {editing ? (
@@ -166,7 +164,7 @@ export function EntryItem({
       ) : (
         <>
           {entry.body ? (
-            <p className="text-ink text-[14.5px] leading-relaxed whitespace-pre-wrap">
+            <p className="text-ink pr-16 text-[14.5px] leading-relaxed whitespace-pre-wrap">
               {highlight ? highlightMatches(entry.body, highlight) : entry.body}
             </p>
           ) : null}
@@ -214,8 +212,12 @@ export function EntryItem({
       )}
 
       <div
-        className="mt-2 flex flex-wrap items-center gap-1.5"
-        hidden={readOnly && attached.length === 0}
+        className={cn(
+          'flex flex-wrap items-center gap-1.5',
+          attached.length > 0
+            ? 'mt-3'
+            : 'mt-3 hidden group-hover:flex pointer-coarse:flex',
+        )}
       >
         {attached.map((t) => (
           <TagPill
@@ -232,7 +234,13 @@ export function EntryItem({
         {!readOnly && available.length > 0 ? (
           <Popover.Root>
             <Popover.Trigger asChild>
-              <button className="border-hairline text-ink-faint hover:text-ink inline-flex items-center gap-1 rounded-full border border-dashed px-2 py-1 text-[12px] leading-none transition-colors">
+              <button
+                className={cn(
+                  'border-hairline text-ink-faint hover:text-ink inline-flex items-center gap-1 rounded-full border border-dashed px-2 py-1 text-[12px] leading-none transition',
+                  attached.length > 0 &&
+                    'opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100',
+                )}
+              >
                 <Plus size={11} /> tag
               </button>
             </Popover.Trigger>
@@ -240,7 +248,7 @@ export function EntryItem({
               <Popover.Content
                 sideOffset={6}
                 align="start"
-                className="border-hairline bg-surface z-50 w-48 rounded-xl border p-1 shadow-lg shadow-black/[0.08]"
+                className="border-hairline bg-overlay shadow-popover animate-pop-in data-[state=closed]:animate-pop-out z-50 w-48 origin-[var(--radix-popover-content-transform-origin)] rounded-xl border p-1"
               >
                 {available.map((t) => (
                   <button
