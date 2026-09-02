@@ -18,6 +18,7 @@ import { Spinner } from '@/components/ui/misc';
 import { useSearchQuery } from '@/lib/api/api';
 import { cn } from '@/lib/cn';
 import { fromDateKey } from '@/lib/date';
+import { highlightMatches } from '@/lib/highlight';
 import { useDebounced } from '@/lib/use-debounced';
 
 interface Row {
@@ -28,21 +29,6 @@ interface Row {
   snippet: string;
   meta: string;
   href: string;
-}
-
-function highlight(text: string, q: string): React.ReactNode {
-  if (!q) return text;
-  const i = text.toLowerCase().indexOf(q.toLowerCase());
-  if (i === -1) return text;
-  return (
-    <>
-      {text.slice(0, i)}
-      <mark className="bg-accent/20 text-accent rounded-[2px] px-0.5">
-        {text.slice(i, i + q.length)}
-      </mark>
-      {text.slice(i + q.length)}
-    </>
-  );
 }
 
 const prettyDate = (d: string): string =>
@@ -222,7 +208,9 @@ function Body({ onClose }: { onClose: () => void }) {
                   <Icon size={15} className="text-ink-faint mt-0.5 shrink-0" />
                   <span className="min-w-0 flex-1">
                     <span className="text-ink flex items-center gap-2 text-[13px]">
-                      <span className="truncate">{highlight(row.title, debounced)}</span>
+                      <span className="truncate">
+                        {highlightMatches(row.title, debounced)}
+                      </span>
                       {row.meta ? (
                         <span className="text-ink-faint shrink-0 text-[11px] capitalize">
                           {row.meta}
@@ -231,7 +219,7 @@ function Body({ onClose }: { onClose: () => void }) {
                     </span>
                     {row.snippet ? (
                       <span className="text-ink-muted mt-0.5 block truncate text-[12px]">
-                        {highlight(row.snippet, debounced)}
+                        {highlightMatches(row.snippet, debounced)}
                       </span>
                     ) : null}
                   </span>

@@ -35,6 +35,7 @@ import {
 import { errorMessage } from '@/lib/api/baseQuery';
 import { cn } from '@/lib/cn';
 import { clockTime, fileSize } from '@/lib/format';
+import { highlightMatches } from '@/lib/highlight';
 import type { Entry, Tag } from '@/lib/types';
 
 export function EntryItem({
@@ -42,11 +43,14 @@ export function EntryItem({
   thoughtId,
   tags,
   readOnly = false,
+  highlight,
 }: {
   entry: Entry;
   thoughtId: string;
   tags: Tag[];
   readOnly?: boolean;
+  /** Active search term — occurrences in the body are marked. */
+  highlight?: string;
 }) {
   const toast = useToast();
   const [editing, setEditing] = useState(false);
@@ -163,7 +167,7 @@ export function EntryItem({
         <>
           {entry.body ? (
             <p className="text-ink text-[14.5px] leading-relaxed whitespace-pre-wrap">
-              {entry.body}
+              {highlight ? highlightMatches(entry.body, highlight) : entry.body}
             </p>
           ) : null}
 

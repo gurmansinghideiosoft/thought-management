@@ -104,6 +104,7 @@ export function Timeline({
                 thoughtId={args.thoughtId}
                 tags={tags}
                 readOnly={readOnly}
+                highlight={args.q}
               />
             ))}
           </div>
