@@ -1,6 +1,7 @@
 'use client';
 
 import { DailyQuote } from '@/components/home/daily-quote';
+import { DayLog } from '@/components/home/day-log';
 import { HabitsToday } from '@/components/home/habits-today';
 import { HeroBanner } from '@/components/home/hero-banner';
 import { RecentThoughts } from '@/components/home/recent-thoughts';
@@ -37,6 +38,7 @@ export default function HomePage() {
       <div className="content-column flex w-full flex-col gap-4 px-4 py-6 sm:px-6">
         <DailyQuote />
         <div className="grid gap-4 lg:grid-cols-2">
+          <DayLog />
           <TodayTasks />
           <HabitsToday />
           <RecentThoughts />

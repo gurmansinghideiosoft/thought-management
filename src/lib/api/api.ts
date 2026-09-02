@@ -19,6 +19,7 @@ import type {
   JournalEntry,
   JournalListResponse,
   JournalStreak,
+  LogEntry,
   Message,
   MessagesResponse,
   RangeMode,
@@ -96,6 +97,7 @@ export const api = createApi({
     'FinanceTag',
     'Recurring',
     'Capture',
+    'Log',
     'Habit',
     'HabitMonth',
     'Review',
@@ -823,6 +825,27 @@ export const api = createApi({
       invalidatesTags: ['Capture'],
     }),
 
+    // --- work log -------------------------------------------------
+    listLog: build.query<{ date: string; items: LogEntry[] }, string>({
+      query: (date) => ({ url: '/log', params: { date } }),
+      providesTags: ['Log'],
+    }),
+    addLogEntry: build.mutation<LogEntry, { text: string; date: string }>({
+      query: (data) => ({ url: '/log', method: 'POST', data }),
+      invalidatesTags: ['Log'],
+    }),
+    updateLogEntry: build.mutation<
+      LogEntry,
+      { id: string; text?: string; date?: string }
+    >({
+      query: ({ id, ...data }) => ({ url: `/log/${id}`, method: 'PATCH', data }),
+      invalidatesTags: ['Log'],
+    }),
+    deleteLogEntry: build.mutation<void, string>({
+      query: (id) => ({ url: `/log/${id}`, method: 'DELETE' }),
+      invalidatesTags: ['Log'],
+    }),
+
     // --- finance ----------------------------------------------------
     listFinanceTags: build.query<FinanceTag[], void>({
       query: () => ({ url: '/finance/tags' }),
@@ -1096,6 +1119,10 @@ export const {
   useCreateCaptureMutation,
   useUpdateCaptureMutation,
   useDeleteCaptureMutation,
+  useListLogQuery,
+  useAddLogEntryMutation,
+  useUpdateLogEntryMutation,
+  useDeleteLogEntryMutation,
   useListFinanceTagsQuery,
   useCreateFinanceTagMutation,
   useUpdateFinanceTagMutation,

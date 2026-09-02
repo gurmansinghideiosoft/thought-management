@@ -542,3 +542,14 @@ export interface ReviewSummary {
   prevReview: SavedReview | null;
   completedStreak: number;
 }
+
+// --- work log ----------------------------------------------------------
+
+export interface LogEntry {
+  id: string;
+  text: string;
+  /** `YYYY-MM-DD` */
+  date: string;
+  createdAt: string;
+  updatedAt: string;
+}
