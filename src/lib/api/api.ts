@@ -9,6 +9,8 @@ import type {
   CredentialCipher,
   CredentialMeta,
   Entry,
+  FinanceSummary,
+  FinanceTag,
   JournalContent,
   JournalEntry,
   JournalListResponse,
@@ -30,6 +32,7 @@ import type {
   ThoughtMembers,
   ThoughtStats,
   TimelineResponse,
+  Transaction,
   User,
   VaultKeystore,
 } from '../types';
@@ -80,6 +83,8 @@ export const api = createApi({
     'Vault',
     'Credentials',
     'Credential',
+    'Finance',
+    'FinanceTag',
   ],
   endpoints: (build) => ({
     // --- auth ------------------------------------------------------------
@@ -112,6 +117,7 @@ export const api = createApi({
         name?: string;
         homeBanner?: string | null;
         journalBanner?: string | null;
+        currency?: string;
       }
     >({
       query: (data) => ({ url: '/auth/me', method: 'PATCH', data }),
@@ -711,6 +717,74 @@ export const api = createApi({
       invalidatesTags: ['Journal'],
     }),
 
+    // --- finance ----------------------------------------------------
+    listFinanceTags: build.query<FinanceTag[], void>({
+      query: () => ({ url: '/finance/tags' }),
+      transformResponse: (r: { items: FinanceTag[] }) => r.items,
+      providesTags: ['FinanceTag'],
+    }),
+    createFinanceTag: build.mutation<FinanceTag, { name: string; color?: string }>({
+      query: (data) => ({ url: '/finance/tags', method: 'POST', data }),
+      invalidatesTags: ['FinanceTag'],
+    }),
+    updateFinanceTag: build.mutation<
+      FinanceTag,
+      { id: string; name?: string; color?: string }
+    >({
+      query: ({ id, ...data }) => ({ url: `/finance/tags/${id}`, method: 'PATCH', data }),
+      invalidatesTags: ['FinanceTag', 'Finance'],
+    }),
+    deleteFinanceTag: build.mutation<void, string>({
+      query: (id) => ({ url: `/finance/tags/${id}`, method: 'DELETE' }),
+      invalidatesTags: ['FinanceTag', 'Finance'],
+    }),
+    listTransactions: build.query<Transaction[], { from: string; to: string }>({
+      query: (params) => ({ url: '/finance/transactions', params }),
+      transformResponse: (r: { items: Transaction[] }) => r.items,
+      providesTags: ['Finance'],
+    }),
+    financeSummary: build.query<FinanceSummary, { from: string; to: string }>({
+      query: (params) => ({ url: '/finance/summary', params }),
+      providesTags: ['Finance'],
+    }),
+    createTransactions: build.mutation<
+      { items: Transaction[] },
+      {
+        transactions: {
+          title: string;
+          amount: number;
+          kind: 'spending' | 'earning';
+          date: string;
+          tagId: string | null;
+        }[];
+      }
+    >({
+      query: (data) => ({ url: '/finance/transactions', method: 'POST', data }),
+      invalidatesTags: ['Finance'],
+    }),
+    updateTransaction: build.mutation<
+      Transaction,
+      {
+        id: string;
+        title?: string;
+        amount?: number;
+        kind?: 'spending' | 'earning';
+        date?: string;
+        tagId?: string | null;
+      }
+    >({
+      query: ({ id, ...data }) => ({
+        url: `/finance/transactions/${id}`,
+        method: 'PATCH',
+        data,
+      }),
+      invalidatesTags: ['Finance'],
+    }),
+    deleteTransaction: build.mutation<void, string>({
+      query: (id) => ({ url: `/finance/transactions/${id}`, method: 'DELETE' }),
+      invalidatesTags: ['Finance'],
+    }),
+
     // --- vault (zero-knowledge; server only ever sees ciphertext) -----
     vaultKeystore: build.query<{ keystore: VaultKeystore | null }, void>({
       query: () => ({ url: '/vault' }),
@@ -834,6 +908,15 @@ export const {
   useUpsertJournalByDateMutation,
   useUpdateJournalEntryMutation,
   useDeleteJournalEntryMutation,
+  useListFinanceTagsQuery,
+  useCreateFinanceTagMutation,
+  useUpdateFinanceTagMutation,
+  useDeleteFinanceTagMutation,
+  useListTransactionsQuery,
+  useFinanceSummaryQuery,
+  useCreateTransactionsMutation,
+  useUpdateTransactionMutation,
+  useDeleteTransactionMutation,
   useVaultKeystoreQuery,
   useSetupVaultMutation,
   useRekeyVaultMutation,

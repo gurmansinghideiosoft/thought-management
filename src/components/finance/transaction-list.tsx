@@ -1,0 +1,152 @@
+'use client';
+
+import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
+
+import { EditTransactionDialog } from '@/components/finance/edit-transaction-dialog';
+import { IconButton } from '@/components/ui/button';
+import {
+  Dropdown,
+  DropdownContent,
+  DropdownItem,
+  DropdownTrigger,
+} from '@/components/ui/dropdown';
+import { EmptyState } from '@/components/ui/misc';
+import { SkeletonRows } from '@/components/ui/skeleton';
+import { useToast } from '@/components/ui/toast';
+import {
+  useDeleteTransactionMutation,
+  useListFinanceTagsQuery,
+  useListTransactionsQuery,
+} from '@/lib/api/api';
+import { errorMessage } from '@/lib/api/baseQuery';
+import { cn } from '@/lib/cn';
+import { prettyDay } from '@/lib/date';
+import { formatMoney } from '@/lib/finance/money';
+import type { Transaction } from '@/lib/types';
+
+export function TransactionList({
+  from,
+  to,
+  currency,
+}: {
+  from: string;
+  to: string;
+  currency: string;
+}) {
+  const { data: items, isLoading } = useListTransactionsQuery({ from, to });
+  const { data: tags } = useListFinanceTagsQuery();
+  const toast = useToast();
+  const [remove] = useDeleteTransactionMutation();
+  const [editing, setEditing] = useState<Transaction | null>(null);
+
+  const tagById = useMemo(() => new Map((tags ?? []).map((t) => [t.id, t])), [tags]);
+
+  const groups = useMemo(() => {
+    const out: { date: string; rows: Transaction[] }[] = [];
+    for (const t of items ?? []) {
+      const last = out.at(-1);
+      if (last && last.date === t.date) last.rows.push(t);
+      else out.push({ date: t.date, rows: [t] });
+    }
+    return out;
+  }, [items]);
+
+  if (isLoading) return <SkeletonRows rows={5} />;
+  if (!items || items.length === 0) {
+    return (
+      <EmptyState
+        title="No transactions"
+        description="Add some from the button up top — spending and earnings both count."
+      />
+    );
+  }
+
+  const del = async (t: Transaction) => {
+    try {
+      await remove(t.id).unwrap();
+      toast.info('Deleted');
+    } catch (err) {
+      toast.error(errorMessage(err, 'Could not delete'));
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-5">
+      {groups.map((g) => (
+        <div key={g.date} className="flex flex-col gap-1.5">
+          <p className="text-ink-faint px-1 text-[11px] font-medium tracking-wide uppercase">
+            {prettyDay(g.date)}
+          </p>
+          <ul className="border-hairline bg-surface divide-hairline divide-y overflow-hidden rounded-xl border">
+            {g.rows.map((t) => {
+              const tag = t.tagId ? tagById.get(t.tagId) : null;
+              const earning = t.kind === 'earning';
+              return (
+                <li
+                  key={t.id}
+                  className="group flex items-center gap-3 px-3 py-2.5 text-sm"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-ink truncate">{t.title}</p>
+                    {tag ? (
+                      <span className="text-ink-faint mt-0.5 inline-flex items-center gap-1 text-[11px]">
+                        <span
+                          className="size-1.5 rounded-full"
+                          style={{ backgroundColor: tag.color }}
+                        />
+                        {tag.name}
+                      </span>
+                    ) : null}
+                  </div>
+                  <span
+                    className={cn(
+                      'shrink-0 font-medium tabular-nums',
+                      earning ? 'text-success' : 'text-ink',
+                    )}
+                  >
+                    {earning ? '+' : ''}
+                    {formatMoney(t.amount, currency)}
+                  </span>
+                  <Dropdown>
+                    <DropdownTrigger asChild>
+                      <IconButton
+                        label="Transaction actions"
+                        className="size-7 opacity-0 transition-opacity group-hover:opacity-100 pointer-coarse:opacity-100"
+                      >
+                        <MoreHorizontal size={15} />
+                      </IconButton>
+                    </DropdownTrigger>
+                    <DropdownContent>
+                      <DropdownItem
+                        icon={<Pencil size={14} />}
+                        onSelect={() => setEditing(t)}
+                      >
+                        Edit
+                      </DropdownItem>
+                      <DropdownItem
+                        danger
+                        icon={<Trash2 size={14} />}
+                        onSelect={() => void del(t)}
+                      >
+                        Delete
+                      </DropdownItem>
+                    </DropdownContent>
+                  </Dropdown>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+
+      {editing ? (
+        <EditTransactionDialog
+          transaction={editing}
+          open={editing !== null}
+          onOpenChange={(o) => !o && setEditing(null)}
+        />
+      ) : null}
+    </div>
+  );
+}

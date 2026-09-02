@@ -9,6 +9,8 @@ export interface User {
   /** Chosen banner ids (see `src/lib/banners.ts`); `null` = default. */
   homeBanner: string | null;
   journalBanner: string | null;
+  /** ISO 4217 code used to format money in the Finance section. */
+  currency: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -329,4 +331,47 @@ export interface CredentialField {
 export interface CredentialPayload {
   fields: CredentialField[];
   notes: string;
+}
+
+// --- finance -----------------------------------------------------------
+
+export interface FinanceTag {
+  id: string;
+  name: string;
+  color: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type TransactionKind = 'spending' | 'earning';
+
+export interface Transaction {
+  id: string;
+  title: string;
+  amount: number;
+  kind: TransactionKind;
+  /** `YYYY-MM-DD`. */
+  date: string;
+  tagId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** One row of the "spending by tag" breakdown. */
+export interface TagSpend {
+  tagId: string | null;
+  name: string;
+  color: string;
+  total: number;
+  count: number;
+}
+
+export interface FinanceSummary {
+  from: string;
+  to: string;
+  totalSpending: number;
+  totalEarning: number;
+  net: number;
+  count: number;
+  byTag: TagSpend[];
 }
