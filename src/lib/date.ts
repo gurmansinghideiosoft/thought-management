@@ -61,4 +61,13 @@ export const prettyDayShort = (dateKey: string): string => {
   return `${format(d, 'EEE')} · ${format(d, 'MMM d')}${isToday(d) ? ' · today' : ''}`;
 };
 
+/** `"Sep 1 – 7"` when the range stays in one month, `"Aug 31 – Sep 6"` otherwise. */
+export const prettyRange = (from: string, to: string): string => {
+  const a = fromDateKey(from);
+  const b = fromDateKey(to);
+  const right =
+    format(a, 'MMM') === format(b, 'MMM') ? format(b, 'd') : format(b, 'MMM d');
+  return `${format(a, 'MMM d')} – ${right}`;
+};
+
 export const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];

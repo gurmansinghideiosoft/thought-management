@@ -23,6 +23,9 @@ import type {
   MessagesResponse,
   RangeMode,
   RecurringTransaction,
+  Review,
+  ReviewPeriod,
+  ReviewSummary,
   RoutineItem,
   SearchResponse,
   Tag,
@@ -95,6 +98,7 @@ export const api = createApi({
     'Capture',
     'Habit',
     'HabitMonth',
+    'Review',
   ],
   endpoints: (build) => ({
     // --- auth ------------------------------------------------------------
@@ -978,6 +982,38 @@ export const api = createApi({
       query: (id) => ({ url: `/vault/credentials/${id}`, method: 'DELETE' }),
       invalidatesTags: ['Credentials'],
     }),
+
+    // --- reviews ------------------------------------------------
+    reviewSummary: build.query<
+      ReviewSummary,
+      { period: ReviewPeriod; anchor?: string; today?: string }
+    >({
+      query: (params) => ({ url: '/reviews/summary', params: clean({ ...params }) }),
+      providesTags: ['Review'],
+    }),
+    listReviews: build.query<Review[], { period: ReviewPeriod; limit?: number }>({
+      query: (params) => ({ url: '/reviews', params: clean({ ...params }) }),
+      transformResponse: (r: { items: Review[] }) => r.items,
+      providesTags: ['Review'],
+    }),
+    saveReview: build.mutation<
+      Review,
+      {
+        period: ReviewPeriod;
+        periodKey: string;
+        intentions?: string;
+        reflection?: string;
+        rating?: number | null;
+        completed?: boolean;
+      }
+    >({
+      query: ({ period, periodKey, ...data }) => ({
+        url: `/reviews/${period}/${periodKey}`,
+        method: 'PUT',
+        data,
+      }),
+      invalidatesTags: ['Review'],
+    }),
   }),
 });
 
@@ -1083,4 +1119,7 @@ export const {
   useCreateCredentialMutation,
   useUpdateCredentialMutation,
   useDeleteCredentialMutation,
+  useReviewSummaryQuery,
+  useListReviewsQuery,
+  useSaveReviewMutation,
 } = api;

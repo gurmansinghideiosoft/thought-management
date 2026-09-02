@@ -468,3 +468,77 @@ export interface FinanceSummary {
   count: number;
   byTag: TagSpend[];
 }
+
+// --- reviews -------------------------------------------------------------
+
+export type ReviewPeriod = 'week' | 'month';
+
+export interface Review {
+  id: string;
+  period: ReviewPeriod;
+  /** `2026-W38` for a week, `2026-09` for a month. */
+  periodKey: string;
+  intentions: string;
+  reflection: string;
+  rating: number | null;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** The user-written slice of a review, as embedded in the summary. */
+export interface SavedReview {
+  intentions: string;
+  reflection: string;
+  rating: number | null;
+  completedAt: string | null;
+}
+
+export interface ReviewSummary {
+  period: ReviewPeriod;
+  periodKey: string;
+  range: { from: string; to: string };
+  prevRange: { from: string; to: string };
+  isCurrent: boolean;
+  tasks: {
+    done: number;
+    donePrev: number;
+    open: number;
+    list: { content: string; date: string | null; priority: number }[];
+  };
+  journal: {
+    written: number;
+    writtenPrev: number;
+    words: number;
+    streak: { current: number; longest: number };
+    list: { id: string; date: string; title: string; excerpt: string }[];
+  };
+  finance: {
+    totalSpending: number;
+    totalEarning: number;
+    net: number;
+    spendingPrev: number;
+    byTag: { tagId: string | null; name: string; color: string; total: number }[];
+  };
+  thoughts: {
+    entriesAdded: number;
+    entriesAddedPrev: number;
+    touched: number;
+    list: { id: string; title: string; count: number }[];
+  };
+  habits: {
+    overallRate: number;
+    overallRatePrev: number;
+    items: {
+      name: string;
+      color: string;
+      done: number;
+      possible: number;
+      rate: number;
+    }[];
+  };
+  captures: { created: number; processed: number };
+  saved: SavedReview | null;
+  prevReview: SavedReview | null;
+  completedStreak: number;
+}
