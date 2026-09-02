@@ -15,6 +15,7 @@ import {
   NotebookPen,
   Plus,
   Search,
+  Settings,
   Telescope,
   Trash2,
   Wallet,
@@ -48,6 +49,7 @@ const NAV = [
   { href: '/finance', label: 'Finance', icon: Wallet },
   { href: '/vault', label: 'Vault', icon: KeyRound },
   { href: '/activity', label: 'Activity', icon: Activity },
+  { href: '/settings', label: 'Settings', icon: Settings },
   { href: '/trash', label: 'Trash', icon: Trash2 },
 ] as const;
 
