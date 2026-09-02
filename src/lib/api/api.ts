@@ -24,6 +24,7 @@ import type {
   RangeMode,
   RecurringTransaction,
   RoutineItem,
+  SearchResponse,
   Tag,
   TagWithCount,
   Task,
@@ -726,6 +727,12 @@ export const api = createApi({
       invalidatesTags: ['Journal'],
     }),
 
+    // --- global search ------------------------------------------
+    search: build.query<SearchResponse, string>({
+      query: (q) => ({ url: '/search', params: { q } }),
+      keepUnusedDataFor: 30,
+    }),
+
     // --- habits ---------------------------------------------------
     listHabits: build.query<Habit[], { date?: string; includeArchived?: boolean } | void>(
       {
@@ -1058,6 +1065,7 @@ export const {
   useCreateRecurringMutation,
   useUpdateRecurringMutation,
   useDeleteRecurringMutation,
+  useSearchQuery,
   useListHabitsQuery,
   useCreateHabitMutation,
   useUpdateHabitMutation,

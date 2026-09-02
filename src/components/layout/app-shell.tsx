@@ -14,6 +14,7 @@ import {
   Menu as MenuIcon,
   NotebookPen,
   Plus,
+  Search,
   Trash2,
   Wallet,
   X,
@@ -24,6 +25,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Logo } from '@/components/brand/logo';
 import { QuickCaptureDialog } from '@/components/capture/quick-capture';
+import { SearchDialog } from '@/components/search/search-dialog';
 import {
   useListCapturesQuery,
   useListConversationsQuery,
@@ -156,17 +158,32 @@ function AccountFooter({ user, onSignOut }: { user: User; onSignOut: () => void 
   );
 }
 
-function CaptureButton({ onClick }: { onClick: () => void }) {
+function SidebarButton({
+  onClick,
+  icon: Icon,
+  label,
+  hint,
+  className,
+}: {
+  onClick: () => void;
+  icon: typeof Plus;
+  label: string;
+  hint: string;
+  className?: string;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="border-hairline text-ink-muted hover:border-ink-faint/40 hover:text-ink mb-2 flex w-full items-center gap-2 rounded-lg border border-dashed px-2.5 py-2 text-sm transition-colors"
+      className={cn(
+        'border-hairline text-ink-muted hover:border-ink-faint/40 hover:text-ink flex w-full items-center gap-2 rounded-lg border border-dashed px-2.5 py-2 text-sm transition-colors',
+        className,
+      )}
     >
-      <Plus size={15} />
-      Quick capture
+      <Icon size={15} />
+      {label}
       <kbd className="border-hairline text-ink-faint ml-auto rounded border px-1 font-sans text-[10px]">
-        C
+        {hint}
       </kbd>
     </button>
   );
@@ -183,10 +200,22 @@ export function AppShell({
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [captureOpen, setCaptureOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
-  // Press `c` from anywhere (not while typing) to capture a thought.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // ⌘K / Ctrl+K — global search, from anywhere.
+      if (
+        (e.metaKey || e.ctrlKey) &&
+        !e.shiftKey &&
+        !e.altKey &&
+        e.key.toLowerCase() === 'k'
+      ) {
+        e.preventDefault();
+        setSearchOpen(true);
+        return;
+      }
+      // Bare `c` — quick capture, but not while typing.
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key.toLowerCase() !== 'c') return;
       const el = e.target as HTMLElement | null;
@@ -204,13 +233,27 @@ export function AppShell({
     // and mobile bar never move with the page.
     <div className="flex min-h-0 flex-1 overflow-hidden">
       <QuickCaptureDialog open={captureOpen} onOpenChange={setCaptureOpen} />
+      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
 
       {/* desktop sidebar */}
       <aside className="border-hairline bg-surface/60 hidden w-60 shrink-0 flex-col overflow-y-auto border-r px-3 py-4 backdrop-blur-sm md:flex">
         <Link href="/home" className="px-2.5 pb-4">
           <Logo />
         </Link>
-        <CaptureButton onClick={() => setCaptureOpen(true)} />
+        <SidebarButton
+          onClick={() => setSearchOpen(true)}
+          icon={Search}
+          label="Search"
+          hint="⌘K"
+          className="mb-1.5"
+        />
+        <SidebarButton
+          onClick={() => setCaptureOpen(true)}
+          icon={Plus}
+          label="Quick capture"
+          hint="C"
+          className="mb-2"
+        />
         <NavLinks />
         <AccountFooter user={user} onSignOut={onSignOut} />
       </aside>
@@ -240,11 +283,25 @@ export function AppShell({
                     <X size={16} />
                   </Dialog.Close>
                 </div>
-                <CaptureButton
+                <SidebarButton
+                  onClick={() => {
+                    setDrawerOpen(false);
+                    setSearchOpen(true);
+                  }}
+                  icon={Search}
+                  label="Search"
+                  hint="⌘K"
+                  className="mb-1.5"
+                />
+                <SidebarButton
                   onClick={() => {
                     setDrawerOpen(false);
                     setCaptureOpen(true);
                   }}
+                  icon={Plus}
+                  label="Quick capture"
+                  hint="C"
+                  className="mb-2"
                 />
                 <NavLinks onNavigate={() => setDrawerOpen(false)} />
                 <AccountFooter user={user} onSignOut={onSignOut} />

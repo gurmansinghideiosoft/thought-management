@@ -333,6 +333,35 @@ export interface CredentialPayload {
   notes: string;
 }
 
+// --- global search -------------------------------------------------
+
+export interface SearchGroups {
+  thoughts: { id: string; title: string; snippet: string }[];
+  entries: {
+    id: string;
+    thoughtId: string;
+    thoughtTitle: string;
+    kind: string;
+    snippet: string;
+    createdAt: string;
+  }[];
+  journal: { id: string; date: string; title: string; snippet: string }[];
+  tasks: { id: string; content: string; date: string | null; status: string }[];
+  transactions: {
+    id: string;
+    title: string;
+    amount: number;
+    kind: string;
+    date: string;
+  }[];
+  captures: { id: string; text: string; status: string; createdAt: string }[];
+}
+
+export interface SearchResponse {
+  query: string;
+  groups: SearchGroups;
+}
+
 // --- habits ----------------------------------------------------------
 
 export type HabitType = 'binary' | 'count';
