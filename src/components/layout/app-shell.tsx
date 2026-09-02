@@ -156,9 +156,11 @@ export function AppShell({
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <div className="flex min-h-full flex-1">
+    // Cap the shell at the viewport and let only <main> scroll, so the sidebar
+    // and mobile bar never move with the page.
+    <div className="flex min-h-0 flex-1 overflow-hidden">
       {/* desktop sidebar */}
-      <aside className="border-hairline bg-surface/60 hidden w-60 shrink-0 flex-col border-r px-3 py-4 backdrop-blur-sm md:flex">
+      <aside className="border-hairline bg-surface/60 hidden w-60 shrink-0 flex-col overflow-y-auto border-r px-3 py-4 backdrop-blur-sm md:flex">
         <Link href="/home" className="px-2.5 pb-5">
           <Logo />
         </Link>
@@ -166,9 +168,9 @@ export function AppShell({
         <AccountFooter user={user} onSignOut={onSignOut} />
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         {/* mobile top bar */}
-        <div className="border-hairline bg-surface/70 flex items-center gap-2 border-b px-3 py-2.5 backdrop-blur-sm md:hidden">
+        <div className="border-hairline bg-surface/70 flex shrink-0 items-center gap-2 border-b px-3 py-2.5 backdrop-blur-sm md:hidden">
           <Dialog.Root open={drawerOpen} onOpenChange={setDrawerOpen}>
             <Dialog.Trigger
               aria-label="Open menu"
@@ -201,7 +203,9 @@ export function AppShell({
           </Link>
         </div>
 
-        <main className="flex min-w-0 flex-1 flex-col">{children}</main>
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto">
+          {children}
+        </main>
       </div>
     </div>
   );
