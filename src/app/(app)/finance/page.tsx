@@ -1,25 +1,36 @@
 'use client';
 
-import { Plus, Tags } from 'lucide-react';
+import { MoreHorizontal, Plus, Repeat, Tags } from 'lucide-react';
 import { useState } from 'react';
 
 import { AddTransactionsDialog } from '@/components/finance/add-transactions-dialog';
+import { BudgetsStrip } from '@/components/finance/budgets-strip';
 import { FinanceTagManager } from '@/components/finance/finance-tag-manager';
 import {
   defaultRange,
   FinanceRangePicker,
   type DateRange,
 } from '@/components/finance/finance-range-picker';
+import { RecurringManager } from '@/components/finance/recurring-manager';
 import { SpendingByTag } from '@/components/finance/spending-by-tag';
 import { TransactionList } from '@/components/finance/transaction-list';
 import { PageHeader } from '@/components/layout/page-header';
-import { Button } from '@/components/ui/button';
+import { Button, IconButton } from '@/components/ui/button';
+import {
+  Dropdown,
+  DropdownContent,
+  DropdownItem,
+  DropdownTrigger,
+} from '@/components/ui/dropdown';
 import { Select } from '@/components/ui/select';
 import { useFinanceSummaryQuery, useMeQuery, useUpdateMeMutation } from '@/lib/api/api';
 import { CURRENCIES, formatMoney } from '@/lib/finance/money';
 
 export default function FinancePage() {
   const [range, setRange] = useState<DateRange>(() => defaultRange());
+  const [tagsOpen, setTagsOpen] = useState(false);
+  const [recurringOpen, setRecurringOpen] = useState(false);
+
   const { data: me } = useMeQuery();
   const currency = me?.user.currency ?? 'USD';
   const [updateMe] = useUpdateMeMutation();
@@ -42,14 +53,27 @@ export default function FinancePage() {
               options={CURRENCIES.map((c) => ({ value: c, label: c }))}
               className="h-8 text-[13px]"
             />
-            <FinanceTagManager
-              trigger={
-                <Button size="sm" variant="secondary">
-                  <Tags size={14} />
-                  Tags
-                </Button>
-              }
-            />
+            <Dropdown>
+              <DropdownTrigger asChild>
+                <IconButton label="Finance settings">
+                  <MoreHorizontal size={18} />
+                </IconButton>
+              </DropdownTrigger>
+              <DropdownContent>
+                <DropdownItem
+                  icon={<Tags size={14} />}
+                  onSelect={() => setTagsOpen(true)}
+                >
+                  Tags &amp; budgets
+                </DropdownItem>
+                <DropdownItem
+                  icon={<Repeat size={14} />}
+                  onSelect={() => setRecurringOpen(true)}
+                >
+                  Recurring transactions
+                </DropdownItem>
+              </DropdownContent>
+            </Dropdown>
             <AddTransactionsDialog
               trigger={
                 <Button size="sm">
@@ -61,6 +85,9 @@ export default function FinancePage() {
           </div>
         }
       />
+
+      <FinanceTagManager open={tagsOpen} onOpenChange={setTagsOpen} />
+      <RecurringManager open={recurringOpen} onOpenChange={setRecurringOpen} />
 
       <FinanceRangePicker value={range} onChange={setRange} />
 
@@ -86,6 +113,8 @@ export default function FinancePage() {
           </span>{' '}
           over {summary?.count ?? 0} transaction{summary?.count === 1 ? '' : 's'}
         </p>
+
+        <BudgetsStrip currency={currency} />
 
         <section className="mt-8">
           <h2 className="text-ink mb-3 font-serif text-lg font-semibold">

@@ -20,6 +20,7 @@ import type {
   Message,
   MessagesResponse,
   RangeMode,
+  RecurringTransaction,
   RoutineItem,
   Tag,
   TagWithCount,
@@ -87,6 +88,7 @@ export const api = createApi({
     'Credential',
     'Finance',
     'FinanceTag',
+    'Recurring',
     'Capture',
   ],
   endpoints: (build) => ({
@@ -748,13 +750,16 @@ export const api = createApi({
       transformResponse: (r: { items: FinanceTag[] }) => r.items,
       providesTags: ['FinanceTag'],
     }),
-    createFinanceTag: build.mutation<FinanceTag, { name: string; color?: string }>({
+    createFinanceTag: build.mutation<
+      FinanceTag,
+      { name: string; color?: string; monthlyBudget?: number | null }
+    >({
       query: (data) => ({ url: '/finance/tags', method: 'POST', data }),
       invalidatesTags: ['FinanceTag'],
     }),
     updateFinanceTag: build.mutation<
       FinanceTag,
-      { id: string; name?: string; color?: string }
+      { id: string; name?: string; color?: string; monthlyBudget?: number | null }
     >({
       query: ({ id, ...data }) => ({ url: `/finance/tags/${id}`, method: 'PATCH', data }),
       invalidatesTags: ['FinanceTag', 'Finance'],
@@ -808,6 +813,48 @@ export const api = createApi({
     deleteTransaction: build.mutation<void, string>({
       query: (id) => ({ url: `/finance/transactions/${id}`, method: 'DELETE' }),
       invalidatesTags: ['Finance'],
+    }),
+    listRecurring: build.query<RecurringTransaction[], void>({
+      query: () => ({ url: '/finance/recurring' }),
+      transformResponse: (r: { items: RecurringTransaction[] }) => r.items,
+      providesTags: ['Recurring'],
+    }),
+    createRecurring: build.mutation<
+      RecurringTransaction,
+      {
+        title: string;
+        amount: number;
+        kind: 'spending' | 'earning';
+        tagId: string | null;
+        dayOfMonth: number;
+        active: boolean;
+      }
+    >({
+      query: (data) => ({ url: '/finance/recurring', method: 'POST', data }),
+      invalidatesTags: ['Recurring', 'Finance'],
+    }),
+    updateRecurring: build.mutation<
+      RecurringTransaction,
+      {
+        id: string;
+        title?: string;
+        amount?: number;
+        kind?: 'spending' | 'earning';
+        tagId?: string | null;
+        dayOfMonth?: number;
+        active?: boolean;
+      }
+    >({
+      query: ({ id, ...data }) => ({
+        url: `/finance/recurring/${id}`,
+        method: 'PATCH',
+        data,
+      }),
+      invalidatesTags: ['Recurring', 'Finance'],
+    }),
+    deleteRecurring: build.mutation<void, string>({
+      query: (id) => ({ url: `/finance/recurring/${id}`, method: 'DELETE' }),
+      invalidatesTags: ['Recurring', 'Finance'],
     }),
 
     // --- vault (zero-knowledge; server only ever sees ciphertext) -----
@@ -946,6 +993,10 @@ export const {
   useCreateTransactionsMutation,
   useUpdateTransactionMutation,
   useDeleteTransactionMutation,
+  useListRecurringQuery,
+  useCreateRecurringMutation,
+  useUpdateRecurringMutation,
+  useDeleteRecurringMutation,
   useVaultKeystoreQuery,
   useSetupVaultMutation,
   useRekeyVaultMutation,

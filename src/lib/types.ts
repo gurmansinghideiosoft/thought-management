@@ -351,6 +351,8 @@ export interface FinanceTag {
   id: string;
   name: string;
   color: string;
+  /** Monthly spending target; `null` = no budget. */
+  monthlyBudget: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -365,6 +367,22 @@ export interface Transaction {
   /** `YYYY-MM-DD`. */
   date: string;
   tagId: string | null;
+  /** Set when auto-posted from a recurring rule. */
+  recurringId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RecurringTransaction {
+  id: string;
+  title: string;
+  amount: number;
+  kind: TransactionKind;
+  tagId: string | null;
+  /** 1–31, clamped to the month's last day when posted. */
+  dayOfMonth: number;
+  active: boolean;
+  lastPostedMonth: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -376,6 +394,7 @@ export interface TagSpend {
   color: string;
   total: number;
   count: number;
+  budget: number | null;
 }
 
 export interface FinanceSummary {

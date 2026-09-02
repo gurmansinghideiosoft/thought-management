@@ -4,7 +4,7 @@ import { Check, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button, IconButton } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { CenteredSpinner } from '@/components/ui/misc';
 import { useToast } from '@/components/ui/toast';
@@ -15,6 +15,7 @@ import {
   useUpdateFinanceTagMutation,
 } from '@/lib/api/api';
 import { errorMessage } from '@/lib/api/baseQuery';
+import { parseAmount } from '@/lib/finance/money';
 
 const SWATCHES = ['#c96442', '#3f7d58', '#3b6ea5', '#8a5cf6', '#c2410c', '#6f6d65'];
 
@@ -43,7 +44,13 @@ function ColorPicker({
   );
 }
 
-export function FinanceTagManager({ trigger }: { trigger: React.ReactNode }) {
+export function FinanceTagManager({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const { data: tags, isLoading } = useListFinanceTagsQuery();
   const [createTag, { isLoading: creating }] = useCreateFinanceTagMutation();
   const [updateTag] = useUpdateFinanceTagMutation();
@@ -64,11 +71,11 @@ export function FinanceTagManager({ trigger }: { trigger: React.ReactNode }) {
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        title="Spending tags"
-        description="Deleting a tag leaves its transactions untagged."
+        title="Tags & budgets"
+        description="A monthly budget turns the bar amber, then red, as you spend it."
+        className="max-w-lg"
       >
         {isLoading ? (
           <CenteredSpinner />
@@ -80,8 +87,10 @@ export function FinanceTagManager({ trigger }: { trigger: React.ReactNode }) {
                   key={t.id}
                   name={t.name}
                   color={t.color}
+                  budget={t.monthlyBudget}
                   onRename={(newName) => updateTag({ id: t.id, name: newName })}
                   onRecolor={(newColor) => updateTag({ id: t.id, color: newColor })}
+                  onBudget={(v) => updateTag({ id: t.id, monthlyBudget: v })}
                   onDelete={async () => {
                     try {
                       await deleteTag(t.id).unwrap();
@@ -120,18 +129,34 @@ export function FinanceTagManager({ trigger }: { trigger: React.ReactNode }) {
 function TagRow({
   name,
   color,
+  budget,
   onRename,
   onRecolor,
+  onBudget,
   onDelete,
 }: {
   name: string;
   color: string;
+  budget: number | null;
   onRename: (name: string) => void;
   onRecolor: (color: string) => void;
+  onBudget: (value: number | null) => void;
   onDelete: () => void;
 }) {
   const [draft, setDraft] = useState(name);
+  const [budgetDraft, setBudgetDraft] = useState(budget != null ? String(budget) : '');
   const dirty = draft.trim() !== name && draft.trim().length > 0;
+
+  const commitBudget = () => {
+    const next = budgetDraft.trim() === '' ? null : parseAmount(budgetDraft);
+    const current = budget;
+    if (next === current) return;
+    if (budgetDraft.trim() !== '' && next === null) {
+      setBudgetDraft(current != null ? String(current) : '');
+      return;
+    }
+    onBudget(next);
+  };
 
   return (
     <div className="border-hairline bg-surface flex items-center gap-2 rounded-lg border px-2 py-1.5">
@@ -142,6 +167,16 @@ function TagRow({
         onBlur={() => dirty && onRename(draft.trim())}
         onKeyDown={(e) => e.key === 'Enter' && dirty && onRename(draft.trim())}
         className="text-ink min-w-0 flex-1 bg-transparent text-sm focus:outline-none"
+      />
+      <input
+        value={budgetDraft}
+        onChange={(e) => setBudgetDraft(e.target.value)}
+        onBlur={commitBudget}
+        onKeyDown={(e) => e.key === 'Enter' && commitBudget()}
+        inputMode="decimal"
+        placeholder="/ mo"
+        aria-label={`Monthly budget for ${name}`}
+        className="border-hairline bg-field text-ink placeholder:text-ink-faint h-7 w-20 rounded-md border px-2 text-right text-[12px] tabular-nums focus:outline-none"
       />
       {dirty ? (
         <IconButton label="Save name" onClick={() => onRename(draft.trim())}>

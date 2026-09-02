@@ -1,6 +1,6 @@
 'use client';
 
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Pencil, Repeat, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { EditTransactionDialog } from '@/components/finance/edit-transaction-dialog';
@@ -88,7 +88,16 @@ export function TransactionList({
                   className="group flex items-center gap-3 px-3 py-2.5 text-sm"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="text-ink truncate">{t.title}</p>
+                    <p className="text-ink flex items-center gap-1.5 truncate">
+                      {t.recurringId ? (
+                        <Repeat
+                          size={12}
+                          className="text-ink-faint shrink-0"
+                          aria-label="Recurring"
+                        />
+                      ) : null}
+                      <span className="truncate">{t.title}</span>
+                    </p>
                     {tag ? (
                       <span className="text-ink-faint mt-0.5 inline-flex items-center gap-1 text-[11px]">
                         <span
