@@ -1,9 +1,18 @@
 'use client';
 
-import { MoreHorizontal, Pencil, Repeat, Trash2 } from 'lucide-react';
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  MoreHorizontal,
+  Pencil,
+  Repeat,
+  Trash2,
+  Undo2,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { EditTransactionDialog } from '@/components/finance/edit-transaction-dialog';
+import { EditLoanDialog, RepayLoanDialog } from '@/components/finance/loan-dialogs';
 import { IconButton } from '@/components/ui/button';
 import {
   Dropdown,
@@ -15,6 +24,7 @@ import { EmptyState } from '@/components/ui/misc';
 import { SkeletonRows } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast';
 import {
+  useDeleteLoanMutation,
   useDeleteTransactionMutation,
   useListFinanceTagsQuery,
   useListTransactionsQuery,
@@ -38,7 +48,10 @@ export function TransactionList({
   const { data: tags } = useListFinanceTagsQuery();
   const toast = useToast();
   const [remove] = useDeleteTransactionMutation();
+  const [removeLoan] = useDeleteLoanMutation();
   const [editing, setEditing] = useState<Transaction | null>(null);
+  const [editingLoan, setEditingLoan] = useState<Transaction | null>(null);
+  const [repayingLoan, setRepayingLoan] = useState<Transaction | null>(null);
 
   const tagById = useMemo(() => new Map((tags ?? []).map((t) => [t.id, t])), [tags]);
 
@@ -64,7 +77,7 @@ export function TransactionList({
 
   const del = async (t: Transaction) => {
     try {
-      await remove(t.id).unwrap();
+      await (t.loan ? removeLoan(t.id) : remove(t.id)).unwrap();
       toast.info('Deleted');
     } catch (err) {
       toast.error(errorMessage(err, 'Could not delete'));
@@ -82,6 +95,8 @@ export function TransactionList({
             {g.rows.map((t) => {
               const tag = t.tagId ? tagById.get(t.tagId) : null;
               const earning = t.kind === 'earning';
+              const loan = t.loan;
+              const settled = loan?.status === 'settled';
               return (
                 <li
                   key={t.id}
@@ -89,33 +104,65 @@ export function TransactionList({
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-ink flex items-center gap-1.5 truncate">
-                      {t.recurringId ? (
+                      {loan ? (
+                        loan.direction === 'lent' ? (
+                          <ArrowUpRight
+                            size={12}
+                            className="text-success shrink-0"
+                            aria-label="Lent out"
+                          />
+                        ) : (
+                          <ArrowDownLeft
+                            size={12}
+                            className="text-ink-faint shrink-0"
+                            aria-label="Borrowed"
+                          />
+                        )
+                      ) : t.recurringId ? (
                         <Repeat
                           size={12}
                           className="text-ink-faint shrink-0"
                           aria-label="Recurring"
                         />
                       ) : null}
-                      <span className="truncate">{t.title}</span>
-                    </p>
-                    {tag ? (
-                      <span className="text-ink-faint mt-0.5 inline-flex items-center gap-1 text-[11px]">
-                        <span
-                          className="size-1.5 rounded-full"
-                          style={{ backgroundColor: tag.color }}
-                        />
-                        {tag.name}
+                      <span className={cn('truncate', settled && 'line-through')}>
+                        {t.title}
                       </span>
-                    ) : null}
+                    </p>
+                    <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                      {tag ? (
+                        <span className="text-ink-faint inline-flex items-center gap-1 text-[11px]">
+                          <span
+                            className="size-1.5 rounded-full"
+                            style={{ backgroundColor: tag.color }}
+                          />
+                          {tag.name}
+                        </span>
+                      ) : null}
+                      {loan ? (
+                        <span className="text-ink-faint text-[11px]">
+                          {settled
+                            ? 'loan · settled'
+                            : `${loan.direction === 'lent' ? 'lent' : 'borrowed'} · ${formatMoney(
+                                t.amount,
+                                currency,
+                              )} left`}
+                        </span>
+                      ) : null}
+                    </span>
                   </div>
                   <span
                     className={cn(
                       'shrink-0 font-medium tabular-nums',
-                      earning ? 'text-success' : 'text-ink',
+                      settled
+                        ? 'text-ink-faint line-through'
+                        : earning
+                          ? 'text-success'
+                          : 'text-ink',
                     )}
                   >
                     {earning ? '+' : ''}
-                    {formatMoney(t.amount, currency)}
+                    {formatMoney(loan ? loan.principal : t.amount, currency)}
                   </span>
                   <Dropdown>
                     <DropdownTrigger asChild>
@@ -127,11 +174,19 @@ export function TransactionList({
                       </IconButton>
                     </DropdownTrigger>
                     <DropdownContent>
+                      {loan && !settled ? (
+                        <DropdownItem
+                          icon={<Undo2 size={14} />}
+                          onSelect={() => setRepayingLoan(t)}
+                        >
+                          Record repayment
+                        </DropdownItem>
+                      ) : null}
                       <DropdownItem
                         icon={<Pencil size={14} />}
-                        onSelect={() => setEditing(t)}
+                        onSelect={() => (loan ? setEditingLoan(t) : setEditing(t))}
                       >
-                        Edit
+                        {loan ? 'Edit loan' : 'Edit'}
                       </DropdownItem>
                       <DropdownItem
                         danger
@@ -154,6 +209,21 @@ export function TransactionList({
           transaction={editing}
           open={editing !== null}
           onOpenChange={(o) => !o && setEditing(null)}
+        />
+      ) : null}
+      {editingLoan ? (
+        <EditLoanDialog
+          loan={editingLoan}
+          open={editingLoan !== null}
+          onOpenChange={(o) => !o && setEditingLoan(null)}
+        />
+      ) : null}
+      {repayingLoan ? (
+        <RepayLoanDialog
+          loan={repayingLoan}
+          currency={currency}
+          open={repayingLoan !== null}
+          onOpenChange={(o) => !o && setRepayingLoan(null)}
         />
       ) : null}
     </div>

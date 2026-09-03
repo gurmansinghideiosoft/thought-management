@@ -421,6 +421,32 @@ export interface FinanceTag {
 
 export type TransactionKind = 'spending' | 'earning';
 
+export type LoanDirection = 'lent' | 'borrowed';
+export type LoanStatus = 'open' | 'settled';
+
+export interface LoanRepayment {
+  amount: number;
+  /** `YYYY-MM-DD`. */
+  date: string;
+  at: string;
+}
+
+/** Present when a transaction is money lent out (`lent`, booked as spending) or
+ * borrowed from someone (`borrowed`, booked as earning). The transaction's own
+ * `amount` is the *current outstanding* balance; `principal` is the original. */
+export interface TransactionLoan {
+  counterparty: string;
+  direction: LoanDirection;
+  principal: number;
+  status: LoanStatus;
+  /** `YYYY-MM-DD` once fully repaid; `null` while open. */
+  settledOn: string | null;
+  /** Optional expected return date, `YYYY-MM-DD`. */
+  dueDate: string | null;
+  note: string | null;
+  repayments: LoanRepayment[];
+}
+
 export interface Transaction {
   id: string;
   title: string;
@@ -431,6 +457,8 @@ export interface Transaction {
   tagId: string | null;
   /** Set when auto-posted from a recurring rule. */
   recurringId: string | null;
+  /** Set when this row is money lent out or borrowed. */
+  loan: TransactionLoan | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -467,6 +495,11 @@ export interface FinanceSummary {
   net: number;
   count: number;
   byTag: TagSpend[];
+  /** Money still owed *to* you across all open `lent` loans (not range-scoped). */
+  lentOutstanding: number;
+  /** Money you still owe across all open `borrowed` loans (not range-scoped). */
+  borrowedOutstanding: number;
+  openLoanCount: number;
 }
 
 // --- reviews -------------------------------------------------------------

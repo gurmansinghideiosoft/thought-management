@@ -11,6 +11,7 @@ import {
   FinanceRangePicker,
   type DateRange,
 } from '@/components/finance/finance-range-picker';
+import { LoansSection } from '@/components/finance/loans-section';
 import { RecurringManager } from '@/components/finance/recurring-manager';
 import { SpendingByTag } from '@/components/finance/spending-by-tag';
 import { TransactionList } from '@/components/finance/transaction-list';
@@ -39,6 +40,8 @@ export default function FinancePage() {
   const spending = summary?.totalSpending ?? 0;
   const earning = summary?.totalEarning ?? 0;
   const net = summary?.net ?? 0;
+  const lentOutstanding = summary?.lentOutstanding ?? 0;
+  const borrowedOutstanding = summary?.borrowedOutstanding ?? 0;
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
@@ -114,7 +117,32 @@ export default function FinancePage() {
           over {summary?.count ?? 0} transaction{summary?.count === 1 ? '' : 's'}
         </p>
 
+        {lentOutstanding > 0 || borrowedOutstanding > 0 ? (
+          <p className="text-ink-faint mt-1 text-[13px]">
+            {lentOutstanding > 0 ? (
+              <>
+                <span className="text-success font-medium tabular-nums">
+                  {formatMoney(lentOutstanding, currency)}
+                </span>{' '}
+                lent out
+              </>
+            ) : null}
+            {lentOutstanding > 0 && borrowedOutstanding > 0 ? ' · ' : null}
+            {borrowedOutstanding > 0 ? (
+              <>
+                <span className="text-ink font-medium tabular-nums">
+                  {formatMoney(borrowedOutstanding, currency)}
+                </span>{' '}
+                borrowed
+              </>
+            ) : null}{' '}
+            still outstanding
+          </p>
+        ) : null}
+
         <BudgetsStrip currency={currency} />
+
+        <LoansSection currency={currency} />
 
         <section className="mt-8">
           <h2 className="text-ink mb-3 font-serif text-lg font-semibold">

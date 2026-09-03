@@ -96,6 +96,7 @@ export const api = createApi({
     'Finance',
     'FinanceTag',
     'Recurring',
+    'Loan',
     'Capture',
     'Log',
     'Habit',
@@ -910,11 +911,11 @@ export const api = createApi({
         method: 'PATCH',
         data,
       }),
-      invalidatesTags: ['Finance'],
+      invalidatesTags: ['Finance', 'Loan'],
     }),
     deleteTransaction: build.mutation<void, string>({
       query: (id) => ({ url: `/finance/transactions/${id}`, method: 'DELETE' }),
-      invalidatesTags: ['Finance'],
+      invalidatesTags: ['Finance', 'Loan'],
     }),
     listRecurring: build.query<RecurringTransaction[], void>({
       query: () => ({ url: '/finance/recurring' }),
@@ -957,6 +958,64 @@ export const api = createApi({
     deleteRecurring: build.mutation<void, string>({
       query: (id) => ({ url: `/finance/recurring/${id}`, method: 'DELETE' }),
       invalidatesTags: ['Recurring', 'Finance'],
+    }),
+    // --- loans (money lent out / borrowed) ------------------------
+    listLoans: build.query<
+      Transaction[],
+      { status?: 'open' | 'settled' | 'all'; direction?: 'lent' | 'borrowed' | 'all' }
+    >({
+      query: (params) => ({ url: '/finance/loans', params }),
+      transformResponse: (r: { items: Transaction[] }) => r.items,
+      providesTags: ['Loan'],
+    }),
+    createLoan: build.mutation<
+      Transaction,
+      {
+        counterparty: string;
+        direction?: 'lent' | 'borrowed';
+        amount: number;
+        date: string;
+        dueDate?: string | null;
+        note?: string | null;
+        tagId?: string | null;
+        title?: string;
+      }
+    >({
+      query: (data) => ({ url: '/finance/loans', method: 'POST', data }),
+      invalidatesTags: ['Loan', 'Finance'],
+    }),
+    updateLoan: build.mutation<
+      Transaction,
+      {
+        id: string;
+        counterparty?: string;
+        dueDate?: string | null;
+        note?: string | null;
+        tagId?: string | null;
+        title?: string;
+      }
+    >({
+      query: ({ id, ...data }) => ({
+        url: `/finance/loans/${id}`,
+        method: 'PATCH',
+        data,
+      }),
+      invalidatesTags: ['Loan', 'Finance'],
+    }),
+    repayLoan: build.mutation<
+      Transaction,
+      { id: string; amount?: number; date?: string }
+    >({
+      query: ({ id, ...data }) => ({
+        url: `/finance/loans/${id}/repay`,
+        method: 'POST',
+        data,
+      }),
+      invalidatesTags: ['Loan', 'Finance'],
+    }),
+    deleteLoan: build.mutation<void, string>({
+      query: (id) => ({ url: `/finance/loans/${id}`, method: 'DELETE' }),
+      invalidatesTags: ['Loan', 'Finance'],
     }),
 
     // --- vault (zero-knowledge; server only ever sees ciphertext) -----
@@ -1136,6 +1195,11 @@ export const {
   useCreateRecurringMutation,
   useUpdateRecurringMutation,
   useDeleteRecurringMutation,
+  useListLoansQuery,
+  useCreateLoanMutation,
+  useUpdateLoanMutation,
+  useRepayLoanMutation,
+  useDeleteLoanMutation,
   useSearchQuery,
   useListHabitsQuery,
   useCreateHabitMutation,
