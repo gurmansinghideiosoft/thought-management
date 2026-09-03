@@ -9,6 +9,7 @@ import {
   KeyRound,
   Lightbulb,
   ListChecks,
+  ListTodo,
   LogOut,
   MessagesSquare,
   Menu as MenuIcon,
@@ -27,6 +28,8 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Logo } from '@/components/brand/logo';
 import { QuickCaptureDialog } from '@/components/capture/quick-capture';
+import { QuickLogDialog } from '@/components/home/quick-log-dialog';
+import { QuickTaskDialog } from '@/components/home/quick-task-dialog';
 import { SearchDialog } from '@/components/search/search-dialog';
 import {
   useListCapturesQuery,
@@ -158,34 +161,32 @@ function AccountFooter({ user, onSignOut }: { user: User; onSignOut: () => void 
   );
 }
 
-function SidebarButton({
-  onClick,
-  icon: Icon,
-  label,
-  hint,
-  className,
-}: {
-  onClick: () => void;
+interface QuickAction {
   icon: typeof Plus;
   label: string;
   hint: string;
-  className?: string;
-}) {
+  onSelect: () => void;
+}
+
+/** A single compact row of icon buttons for the global quick actions. Each
+ * button's tooltip carries its keyboard shortcut, so the shortcuts stay
+ * discoverable without four labelled rows crowding the sidebar. */
+function QuickActions({ actions }: { actions: QuickAction[] }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        'border-hairline text-ink-muted hover:border-ink-faint/40 hover:text-ink flex w-full items-center gap-2 rounded-lg border border-dashed px-2.5 py-2 text-sm transition-colors',
-        className,
-      )}
-    >
-      <Icon size={15} />
-      {label}
-      <kbd className="border-hairline text-ink-faint ml-auto rounded border px-1 font-sans text-[10px]">
-        {hint}
-      </kbd>
-    </button>
+    <div className="border-hairline mb-3 grid grid-cols-4 gap-0.5 rounded-xl border p-1">
+      {actions.map(({ icon: Icon, label, hint, onSelect }) => (
+        <button
+          key={label}
+          type="button"
+          onClick={onSelect}
+          aria-label={`${label} (${hint})`}
+          title={`${label}  ·  ${hint}`}
+          className="text-ink-faint hover:bg-surface-2 hover:text-ink focus-halo flex h-8 items-center justify-center rounded-lg transition-colors"
+        >
+          <Icon size={16} />
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -201,8 +202,18 @@ export function AppShell({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [captureOpen, setCaptureOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [logOpen, setLogOpen] = useState(false);
+  const [taskOpen, setTaskOpen] = useState(false);
 
   useEffect(() => {
+    // Bare single-key shortcuts, ignored while a dialog is open or the caret is
+    // in a field — mirrors the `c` quick-capture binding.
+    const bareKeys: Record<string, (v: boolean) => void> = {
+      c: setCaptureOpen,
+      l: setLogOpen,
+      t: setTaskOpen,
+    };
+
     const onKey = (e: KeyboardEvent) => {
       // ⌘K / Ctrl+K — global search, from anywhere.
       if (
@@ -215,14 +226,14 @@ export function AppShell({
         setSearchOpen(true);
         return;
       }
-      // Bare `c` — quick capture, but not while typing.
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.key.toLowerCase() !== 'c') return;
+      const open = bareKeys[e.key.toLowerCase()];
+      if (!open) return;
       const el = e.target as HTMLElement | null;
       if (el?.isContentEditable || (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)))
         return;
       e.preventDefault();
-      setCaptureOpen(true);
+      open(true);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -234,25 +245,41 @@ export function AppShell({
     <div className="flex min-h-0 flex-1 overflow-hidden">
       <QuickCaptureDialog open={captureOpen} onOpenChange={setCaptureOpen} />
       <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+      <QuickLogDialog open={logOpen} onOpenChange={setLogOpen} />
+      <QuickTaskDialog open={taskOpen} onOpenChange={setTaskOpen} />
 
       {/* desktop sidebar */}
       <aside className="border-hairline bg-surface/60 hidden w-60 shrink-0 flex-col overflow-y-auto border-r px-3 py-4 backdrop-blur-sm md:flex">
         <Link href="/home" className="px-2.5 pb-4">
           <Logo />
         </Link>
-        <SidebarButton
-          onClick={() => setSearchOpen(true)}
-          icon={Search}
-          label="Search"
-          hint="⌘K"
-          className="mb-1.5"
-        />
-        <SidebarButton
-          onClick={() => setCaptureOpen(true)}
-          icon={Plus}
-          label="Quick capture"
-          hint="C"
-          className="mb-2"
+        <QuickActions
+          actions={[
+            {
+              icon: Search,
+              label: 'Search',
+              hint: '⌘K',
+              onSelect: () => setSearchOpen(true),
+            },
+            {
+              icon: Plus,
+              label: 'Quick capture',
+              hint: 'C',
+              onSelect: () => setCaptureOpen(true),
+            },
+            {
+              icon: NotebookPen,
+              label: 'Log something',
+              hint: 'L',
+              onSelect: () => setLogOpen(true),
+            },
+            {
+              icon: ListTodo,
+              label: 'Add a task',
+              hint: 'T',
+              onSelect: () => setTaskOpen(true),
+            },
+          ]}
         />
         <NavLinks />
         <AccountFooter user={user} onSignOut={onSignOut} />
@@ -283,25 +310,45 @@ export function AppShell({
                     <X size={16} />
                   </Dialog.Close>
                 </div>
-                <SidebarButton
-                  onClick={() => {
-                    setDrawerOpen(false);
-                    setSearchOpen(true);
-                  }}
-                  icon={Search}
-                  label="Search"
-                  hint="⌘K"
-                  className="mb-1.5"
-                />
-                <SidebarButton
-                  onClick={() => {
-                    setDrawerOpen(false);
-                    setCaptureOpen(true);
-                  }}
-                  icon={Plus}
-                  label="Quick capture"
-                  hint="C"
-                  className="mb-2"
+                <QuickActions
+                  actions={[
+                    {
+                      icon: Search,
+                      label: 'Search',
+                      hint: '⌘K',
+                      onSelect: () => {
+                        setDrawerOpen(false);
+                        setSearchOpen(true);
+                      },
+                    },
+                    {
+                      icon: Plus,
+                      label: 'Quick capture',
+                      hint: 'C',
+                      onSelect: () => {
+                        setDrawerOpen(false);
+                        setCaptureOpen(true);
+                      },
+                    },
+                    {
+                      icon: NotebookPen,
+                      label: 'Log something',
+                      hint: 'L',
+                      onSelect: () => {
+                        setDrawerOpen(false);
+                        setLogOpen(true);
+                      },
+                    },
+                    {
+                      icon: ListTodo,
+                      label: 'Add a task',
+                      hint: 'T',
+                      onSelect: () => {
+                        setDrawerOpen(false);
+                        setTaskOpen(true);
+                      },
+                    },
+                  ]}
                 />
                 <NavLinks onNavigate={() => setDrawerOpen(false)} />
                 <AccountFooter user={user} onSignOut={onSignOut} />

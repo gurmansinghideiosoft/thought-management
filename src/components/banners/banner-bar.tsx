@@ -27,7 +27,9 @@ export function BannerBar({
   return (
     <div
       className={cn(
-        'group bg-surface-2 relative w-full overflow-hidden',
+        // `shrink-0` keeps the hero from being squeezed by tall page content
+        // below it — the page wrapper is a flex column inside a scroll area.
+        'group bg-surface-2 relative w-full shrink-0 overflow-hidden',
         'h-[33vh] max-h-[420px] min-h-[200px]',
         className,
       )}
