@@ -1,17 +1,5 @@
-'use client';
-
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-
-import { CenteredSpinner } from '@/components/ui/misc';
-import { tokenStore } from '@/lib/auth/tokenStore';
+import { LandingPage } from '@/components/landing/landing-page';
 
 export default function IndexPage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace(tokenStore.hasSession() ? '/home' : '/login');
-  }, [router]);
-
-  return <CenteredSpinner />;
+  return <LandingPage />;
 }

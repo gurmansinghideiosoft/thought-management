@@ -1,5 +1,7 @@
 'use client';
 
+import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -33,14 +35,22 @@ export default function AuthLayout({ children }: LayoutProps<'/'>) {
         />
 
         <div className="flex flex-col items-start gap-5 md:pl-10">
-          <LogoMark size={80} className="text-ink hidden md:block" />
-          <LogoMark size={52} className="text-ink md:hidden" />
-          <div>
-            <h1 className="text-ink font-serif text-3xl font-semibold tracking-tight md:text-5xl">
-              Margin
-            </h1>
-            <p className="text-ink-muted mt-2 text-[15px] md:text-base">Room to think.</p>
-          </div>
+          <Link
+            href="/"
+            aria-label="Back to the Margin home page"
+            className="focus-halo flex flex-col items-start gap-5 rounded-lg transition-opacity hover:opacity-80"
+          >
+            <LogoMark size={80} className="text-ink hidden md:block" />
+            <LogoMark size={52} className="text-ink md:hidden" />
+            <div>
+              <h1 className="text-ink font-serif text-3xl font-semibold tracking-tight md:text-5xl">
+                Margin
+              </h1>
+              <p className="text-ink-muted mt-2 text-[15px] md:text-base">
+                Room to think.
+              </p>
+            </div>
+          </Link>
           <p className="text-ink-faint hidden max-w-xs text-sm leading-relaxed md:block">
             Set the day down — tasks, notes, the journal — so your head keeps its open
             room for the work that needs it.
@@ -49,8 +59,17 @@ export default function AuthLayout({ children }: LayoutProps<'/'>) {
       </aside>
 
       {/* Form */}
-      <div className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6">
-        <div className="w-full max-w-sm">{children}</div>
+      <div className="flex flex-1 flex-col px-4 py-6 sm:px-6">
+        <Link
+          href="/"
+          className="text-ink-faint hover:text-ink focus-halo inline-flex items-center gap-1.5 self-start rounded-lg px-1 py-1 text-[13px] font-medium transition-colors"
+        >
+          <ArrowLeft size={15} />
+          Back to home
+        </Link>
+        <div className="flex flex-1 items-center justify-center py-6">
+          <div className="w-full max-w-sm">{children}</div>
+        </div>
       </div>
     </main>
   );
